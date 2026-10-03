@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inside the Engines — Cognee + Sarvam in real code · Sahayak</title>
+<style>
+  :root{
+    --navy:#07203B; --navy2:#0E3157; --cyan:#00BAF2; --cyan-dk:#0091C7;
+    --bg:#F5F9FC; --card:#FFFFFF; --ink:#12263A; --muted:#5B7185;
+    --line:#DCE7F0; --ok:#0FB27F; --okbg:#E6F7F1; --bad:#E5484D; --badbg:#FDECEC;
+    --warn:#E8A13C; --warnbg:#FCF3E4; --purple:#7C5CFF; --purplebg:#EFEBFF;
+    --sarvam:#F2994A; --sarvambg:#FEF2E8; --cognee:#7C5CFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  h1,h2,h3,h4{color:var(--navy);line-height:1.25}
+  a{color:var(--cyan-dk)}
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:10px 22px;overflow-x:auto;white-space:nowrap}
+  nav .brand{font-weight:800;color:var(--navy);margin-right:14px;display:flex;align-items:center;gap:8px}
+  nav .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(0,186,242,.18)}
+  nav a.nl{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:20px;transition:.18s}
+  nav a.nl:hover{background:#EDF6FC;color:var(--navy)}
+  section{max-width:1080px;margin:0 auto;padding:60px 24px 8px}
+  .kicker{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan-dk);background:#E4F6FD;padding:5px 12px;border-radius:20px;margin-bottom:12px}
+  .sec-title{font-size:clamp(25px,4vw,34px);font-weight:800;margin-bottom:8px}
+  .lede{color:var(--muted);font-size:16.5px;max-width:800px;margin-bottom:26px}
+  .sub{font-size:19px;font-weight:700;margin:32px 0 12px;color:var(--navy)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(7,32,59,.05)}
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:900px){.g3{grid-template-columns:1fr}}
+  @media(max-width:640px){.g2{grid-template-columns:1fr}}
+  .note{font-size:12.5px;color:var(--muted);margin-top:12px;font-style:italic}
+
+  header.hero{background:linear-gradient(150deg,var(--navy) 0%,var(--navy2) 60%,#11406e 100%);color:#fff;padding:64px 24px 72px}
+  .hero-inner{max-width:1080px;margin:0 auto}
+  .hero .tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#8FE1FF;background:rgba(0,186,242,.12);border:1px solid rgba(0,186,242,.35);padding:6px 14px;border-radius:20px;margin-bottom:18px}
+  .hero h1{color:#fff;font-size:clamp(28px,4.4vw,44px);font-weight:800;max-width:860px}
+  .hero h1 em{color:var(--cyan);font-style:normal}
+  .hero p{color:#B9CFE4;font-size:17px;max-width:760px;margin-top:14px}
+  .hero .threes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+  @media(max-width:900px){.hero .threes{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.hero .threes{grid-template-columns:1fr}}
+  .hero .three{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:16px}
+  .hero .three .t{font-weight:800;font-size:15px;display:flex;gap:8px;align-items:center}
+  .hero .three .h{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px}
+  .hero .three p{font-size:12.5px;color:#C4D9EB;margin-top:6px}
+  .hero .three.ours .h{color:#8FE1FF}.hero .three.sarvam .h{color:#FFB27A}.hero .three.cognee .h{color:#C9B9FF}.hero .three.gem .h{color:#B9F0FA}
+
+  /* ARCH MAP */
+  .arch{background:var(--navy);border-radius:20px;padding:26px 22px;color:#fff}
+  .arch-box{border:2px dashed rgba(255,255,255,.3);border-radius:16px;padding:18px;margin-bottom:14px}
+  .arch-box .ab-t{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#8FE1FF;margin-bottom:12px}
+  .arch-row{display:flex;gap:12px;flex-wrap:wrap}
+  .arch-item{flex:1;min-width:170px;background:#0E3157;border:1px solid #1D4E80;border-radius:12px;padding:12px 14px}
+  .arch-item .ai-t{font-weight:800;font-size:13.5px;display:flex;gap:7px;align-items:center}
+  .arch-item p{font-size:12px;color:#A9C4DB;margin-top:4px}
+  .arch-item .lang{font-size:10.5px;font-weight:800;color:#8FE1FF;background:rgba(0,186,242,.12);border-radius:8px;padding:1px 8px;display:inline-block;margin-top:6px}
+  .arch-ext{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:800px){.arch-ext{grid-template-columns:1fr}}
+  .arch-cloud{border-radius:14px;padding:14px 16px}
+  .arch-cloud.gem-c{background:#12293A;border:1px solid #1E5E8C}
+  .arch-cloud.sarvam-c{background:#3A2413;border:1px solid #7A4E1E}
+  .arch-cloud.cust-c{background:#12333A;border:1px solid #1E5A66}
+  .arch-cloud .ac-t{font-weight:800;font-size:14px}
+  .arch-cloud .ac-t .where{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:10px;margin-left:8px}
+  .arch-cloud p{font-size:12px;color:#C4D9EB;margin-top:6px}
+  .arch-flow{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin:14px 0;font-size:12.5px;font-weight:700;color:#8FB3D1}
+  .arch-flow .fa{background:#0E3157;border:1px solid #1D4E80;border-radius:10px;padding:5px 11px}
+  .arch-flow .ar{color:var(--cyan);font-weight:800}
+
+  /* IS / IS NOT */
+  .isnot{border-radius:16px;padding:20px}
+  .isnot.yes{background:#F0FBF7;border:1.5px solid #BCE8DA}
+  .isnot.no{background:#FDF0F0;border:1.5px solid #F2C7CA}
+  .isnot h4{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .isnot ul{list-style:none}
+  .isnot li{font-size:13.5px;padding:4px 0 4px 20px;position:relative;color:#3A4E62}
+  .isnot.yes li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:800}
+  .isnot.no li::before{content:"✕";position:absolute;left:0;color:var(--bad);font-weight:800}
+
+  /* CODE BLOCKS */
+  .codeblock{background:#0B1F35;border-radius:12px;padding:16px 18px;margin:14px 0;overflow-x:auto}
+  .codeblock .cb-tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7FE3FF;margin-bottom:8px}
+  .codeblock pre{font-family:ui-monospace,Consolas,"Cascadia Code",monospace;font-size:12.5px;line-height:1.65;color:#D9E8F5;white-space:pre}
+  .codeblock .c{color:#6E8CA6}.codeblock .s{color:#8FE3A8}.codeblock .k{color:#FFB27A}.codeblock .f{color:#8FD4FF}
+  .annotate{border-left:3px solid var(--cyan);background:#fff;border-radius:0 12px 12px 0;padding:12px 16px;margin:8px 0;font-size:13.5px;color:#3A4E62}
+  .annotate b{color:var(--navy)}
+
+  /* PIPELINE */
+  .pipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:18px 0}
+  .pipe .pstep{flex:1;min-width:130px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .pipe .pstep .pi{font-size:22px}
+  .pipe .pstep .pt{font-size:12.5px;font-weight:800;color:var(--navy);margin-top:4px}
+  .pipe .pstep .pd{font-size:11px;color:var(--muted)}
+  .pipe .parr{display:flex;align-items:center;color:var(--muted);font-weight:800;padding:0 4px}
+
+  /* KNOWLEDGE GRAPH */
+  .kg-wrap{background:#081C33;border-radius:16px;padding:18px;overflow-x:auto}
+  .kg-wrap svg{min-width:760px;width:100%;display:block}
+  .kg-note{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:760px){.kg-note{grid-template-columns:1fr}}
+  .kg-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .kg-card h5{font-size:13px;color:var(--navy);margin-bottom:6px}
+  .kg-card p{font-size:12.5px;color:var(--muted)}
+  .kg-card code{font-family:ui-monospace,monospace;font-size:11.5px;background:#EEF4F9;border-radius:5px;padding:1px 6px}
+
+  /* SEQUENCE */
+  .seq{counter-reset:seqc}
+  .seq .sstep{display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .seq .sstep:last-child{border:none}
+  .seq .sstep::before{counter-increment:seqc;content:counter(seqc);width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .seq .sbody{font-size:13.5px;color:#3A4E62;padding-top:3px}
+  .seq .sbody b{color:var(--navy)}
+  .who{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:1px 9px;border-radius:10px;white-space:nowrap}
+  .who.w-ours{background:#E4F6FD;color:var(--cyan-dk)} .who.w-sarvam{background:var(--sarvambg);color:#9A5A16} .who.w-cognee{background:var(--purplebg);color:#4B31B8} .who.w-gemini{background:#E1F3FC;color:#1668A8}
+
+  footer{margin-top:70px;background:var(--navy);color:#8FB3D1;padding:30px 24px;text-align:center;font-size:13px}
+  footer b{color:#fff}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand"><span class="dot"></span><a href="index.html" style="color:var(--navy);text-decoration:none">UPI 101</a> · <a href="reality.html" style="color:var(--navy);text-decoration:none">Reality</a></span>
+  <a class="nl" href="#arch">Architecture</a>
+  <a class="nl" href="#whatiscognee">What is Cognee</a>
+  <a class="nl" href="#memory">Memory pipeline</a>
+  <a class="nl" href="#graph">The graph</a>
+  <a class="nl" href="#agentloop">The code we write</a>
+  <a class="nl" href="#fullcase">One full case</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="tag">🔬 Deep dive · how the code actually works</span>
+    <h1>Four parts. Four homes. <em>You only write one of them.</em></h1>
+    <p>The agent's intelligence is split so each piece lives where it belongs — updated Oct 1: <b>Gemini is the brain</b>, Sarvam is <b>voice-only</b>. Here's the exact division, then every section below is one of them in working code.</p>
+    <div class="threes">
+      <div class="three ours"><div class="h">🖥️ Runs on our server</div><div class="t">🧩 Our Python code</div><p>The <b>agent loop</b>: prompts, tools, guardrails, the state machine, the UI. The judgment skeleton the LLM lives inside. <b>This is the part we write.</b></p></div>
+      <div class="three gem"><div class="h">☁️ Vertex AI · our GCP project</div><div class="t">✨ Gemini 3 Flash</div><p><b>The brain</b> — every agent decision (tool call / message / escalate) is one Gemini call via <b>Vertex on our GCP subscription</b>: gcloud auth, no API key, no OpenAI SDK. ≈ ₹1 per case.</p></div>
+      <div class="three sarvam"><div class="h">☁️ Runs on Sarvam's cloud</div><div class="t">🗣️ Sarvam API</div><p><b>Voice only:</b> Hindi/regional TTS (Bulbul) for voice notes + STT for customers who reply by voice. What it's uniquely best at — Indian languages.</p></div>
+      <div class="three cognee"><div class="h">📦 Runs inside our process</div><div class="t">🧠 Cognee library</div><p><b>Open-source Python package</b> we import. Builds and queries the case-memory knowledge graph. Pointed at Gemini for extraction. No service to run.</p></div>
+    </div>
+  </div>
+</header>
+
+<!-- 1. ARCHITECTURE -->
+<section id="arch">
+  <span class="kicker">01 · The Architecture Map</span>
+  <h2 class="sec-title">One box is ours. One is a phone call away. One is inside the box.</h2>
+  <p class="lede">Everything Sahayak does happens in this picture. Find each part before reading further — every later section zooms into one box.</p>
+
+  <div class="arch">
+    <div class="arch-box">
+      <div class="ab-t">🖥️ Our app · one Cloud Run container (our code + Cognee inside it)</div>
+      <div class="arch-row">
+        <div class="arch-item"><div class="ai-t">🧩 Agent loop <span class="lang">we write</span></div><p>Receives events &amp; chat → assembles Case Brief → asks the LLM → executes tool calls → enforces guardrails (loop cap, thresholds, never-list)</p></div>
+        <div class="arch-item"><div class="ai-t">🔧 Tool functions <span class="lang">we write</span></div><p><code>check_bank_status(rrn)</code>, <code>file_complaint()</code>, <code>set_sla_timer()</code>, <code>send_update()</code>, <code>escalate()</code> — plain Python hitting our mock rails</p></div>
+        <div class="arch-item"><div class="ai-t">⏱️ Scheduler + state machine <span class="lang">we write</span></div><p>T+1/T+3 timers, retries, case states — replaced n8n, ~200 lines</p></div>
+      </div>
+      <div class="arch-row" style="margin-top:12px">
+        <div class="arch-item" style="border-color:#4B31B8"><div class="ai-t" style="color:#C9B9FF">🧠 Cognee (imported library) <span class="lang" style="color:#C9B9FF;background:rgba(124,92,255,.15)">pip install</span></div><p>IN-PROCESS. Builds the knowledge graph from closed cases into local files (NetworkX graph + LanceDB vectors). Answers <code>recall()</code> queries.</p></div>
+        <div class="arch-item"><div class="ai-t">💾 Mock UPI rails <span class="lang">we write</span></div><p>Fake bank/PSP/NPCI endpoints + seeded payments — the sandbox the tools query</p></div>
+        <div class="arch-item"><div class="ai-t">📱 Paytm-style UI <span class="lang">we write</span></div><p>Payment screen, agent chat, thinking-view timeline (fed by the loop at every step)</p></div>
+      </div>
+    </div>
+    <div class="arch-flow">
+      <span class="fa">🧩 loop assembles brief</span><span class="ar">→</span>
+      <span class="fa">🧠 cognee.recall()</span><span class="ar">→</span>
+      <span class="fa">✨ Gemini decides</span><span class="ar">→</span>
+      <span class="fa">🔧 tool runs</span><span class="ar">→</span>
+      <span class="fa">🗣️ Sarvam speaks it</span>
+    </div>
+    <div class="arch-ext">
+      <div class="arch-cloud gem-c"><div class="ac-t">✨ Gemini <span class="where" style="background:#1E5E8C;color:#B9F0FA">Vertex AI · our GCP</span></div><p><b>The brain — every agent decision.</b> Gemini 3 Flash via <b>Vertex AI on personal-project-dg21</b> (google-genai SDK, gcloud ADC auth — no API key, no OpenAI SDK). Also powers Cognee's extraction (LiteLLM <code>vertex_ai</code>). Billed per token to the subscription we already run — ≈ ₹1 per case.</p></div>
+      <div class="arch-cloud sarvam-c"><div class="ac-t">🗣️ Sarvam <span class="where" style="background:#7A4E1E;color:#FFD9AE">their cloud</span></div><p><b>Voice only in v2.</b> Bulbul TTS (<code>/text-to-speech</code>) for Hindi voice notes + STT for voice replies. Best-in-class Indian-language speech — that's exactly why it stays.</p></div>
+      <div class="arch-cloud cust-c"><div class="ac-t">📲 Customer <span class="where" style="background:#1E5A66;color:#B8F0FA">their phone</span></div><p>WhatsApp/SMS/in-app: text in their language + Sarvam voice notes. Their Hinglish replies come back in — Gemini parses them into JSON (multilingual understanding is free for a frontier model).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. WHAT IS COGNEE -->
+<section id="whatiscognee">
+  <span class="kicker">02 · The direct answer</span>
+  <h2 class="sec-title">What exactly IS Cognee?</h2>
+  <p class="lede">Short version: <b>a Python library you <code>pip install</code> — real, readable source code on GitHub, Apache-2.0 licensed.</b> Not markdown files, not a database, not a model, not a website. Its job: take your data, <b>use an LLM to extract entities and relationships</b>, store them as a knowledge graph + vectors on your disk, and answer natural-language queries over them. "Memory as a library."</p>
+  <div class="grid g2">
+    <div class="isnot yes">
+      <h4>✅ What it IS</h4>
+      <ul>
+        <li><b>Source code</b> — a git repo (<code>github.com/topoteretes/cognee</code>) you can read line-by-line, fork, or modify; Apache-2.0 = free for any use, forever</li>
+        <li>A <b>pipeline builder</b>: text in → chunk → LLM extracts facts ("Case #101 <i>stalled at</i> SBI") → graph + vector stores written to <b>local files</b> by default</li>
+        <li>A <b>query engine</b>: natural-language questions in, answers synthesized from the graph out</li>
+        <li>Provider-agnostic — it calls whatever LLM <b>you</b> configure (we point it at Sarvam, or run it fully local with Ollama = ₹0)</li>
+        <li>In-process: <code>import cognee</code> inside our backend. No separate service, no daemon, no UI to babysit</li>
+      </ul>
+    </div>
+    <div class="isnot no">
+      <h4>❌ What it is NOT</h4>
+      <ul>
+        <li>Not markdown files or docs — nothing to "read into" the model; it's engineering code</li>
+        <li>Not a model — it <b>contains no intelligence</b>; it borrows ours (Sarvam) for extraction</li>
+        <li>Not a database — it <b>uses</b> stores (NetworkX graph + LanceDB vectors by default; can swap Neo4j/Postgres later)</li>
+        <li>Not a chatbot or agent framework — it never talks to users; only our loop calls it</li>
+        <li>Not cloud-locked — no account, no API key of theirs needed for the self-hosted library</li>
+      </ul>
+    </div>
+  </div>
+  <div class="annotate">💡 <b>The mental model:</b> Cognee is to case history what a librarian is to books. The books are our closed case files. When a new case arrives, the agent asks the librarian ("how did similar cases go?") and gets an answer in plain language — instead of us hand-writing SQL against a pile of logs. The librarian's reading skills come from Sarvam; the filing cabinets are local files; the librarian's <i>method</i> is Cognee's open-source code.</div>
+</section>
+
+<!-- 3. MEMORY PIPELINE -->
+<section id="memory">
+  <span class="kicker">03 · Memory pipeline</span>
+  <h2 class="sec-title">How a case becomes memory — and how memory comes back</h2>
+  <p class="lede">Two moments matter: <b>write</b> (case closes → graph grows) and <b>read</b> (new case opens → memory consulted). The API is literally three verbs.</p>
+
+  <div class="pipe">
+    <div class="pstep"><div class="pi">📄</div><div class="pt">case file text</div><div class="pd">what we pass to remember()</div></div>
+    <div class="parr">→</div>
+    <div class="pstep"><div class="pi">✂️</div><div class="pt">chunked</div><div class="pd">split into pieces</div></div>
+    <div class="parr">→</div>
+    <div class="pstep"><div class="pi">🧠</div><div class="pt">LLM extracts facts</div><div class="pd">Sarvam (or Ollama) finds entities + relations</div></div>
+    <div class="parr">→</div>
+    <div class="pstep"><div class="pi">🕸️</div><div class="pt">triples stored</div><div class="pd">graph (local file) + vectors (local file)</div></div>
+    <div class="parr">→</div>
+    <div class="pstep"><div class="pi">🔎</div><div class="pt">recall() queries it</div><div class="pd">graph walk + similarity + answer</div></div>
+  </div>
+
+    <div class="codeblock"><div class="cb-tag">Python · setup — once, at app start (we choose its brain here)</div>
+<pre><span class="c"># requirements.txt:  cognee==&lt;pinned&gt;    (Apache-2.0, pip install)</span>
+<span class="c"># Option A — Cognee's brain = same Vertex Gemini as the agent:</span>
+<span class="c">#   env LLM_PROVIDER=vertex_ai  GOOGLE_APPLICATION_CREDENTIALS=&lt;sa json&gt;</span>
+<span class="c">#   (embedder stays local: sentence-transformers — free, offline)</span>
+<span class="c"># Option B — fully local, zero network, zero cost:</span>
+<span class="c">#   env LLM_PROVIDER=ollama</span>
+<span class="c"># Stores default to local files (NetworkX + LanceDB) → nothing else to run.</span></pre></div>
+
+  <div class="codeblock"><div class="cb-tag">Python · WRITE — called by our code when a case closes</div>
+<pre><span class="k">async def</span> <span class="f">on_case_closed</span>(case):
+    summary = render_case_file(case)   <span class="c"># our formatter → plain text case file</span>
+    <span class="k">await</span> cognee.<span class="f">remember</span>(summary)      <span class="c"># chunks → extracts → graph grows</span>
+    <span class="c"># e.g. text: "Case #101. Z5 debit-credit fail at SBI, ₹2,800,</span>
+    <span class="c">#   ben=shop@ybl, auto-reversal landed in 26h, customer satisfied."</span>
+    <span class="c"># Cognee+Sarvam extract: (Case#101)-[code]-&gt;(Z5), (Case#101)-[bank]-&gt;(SBI),</span>
+    <span class="c">#   (Case#101)-[resolved_in]-&gt;(26h), (shop@ybl)-[ben_of]-&gt;(Case#101) ...</span></pre></div>
+
+  <div class="codeblock"><div class="cb-tag">Python · READ — called inside the agent loop before deciding</div>
+<pre><span class="k">async def</span> <span class="f">memory_context</span>(brief):
+    q = <span class="k">f</span><span class="s">"similar {brief['resp_code']} cases at {brief['ben_bank']}: "
+       <span class="s">"count, median resolution hours, and whether {brief['ben_vpa']} "
+       <span class="s">"appeared in any prior case"</span>
+    results = <span class="k">await</span> cognee.<span class="f">recall</span>(query_text=q)
+    <span class="k">return</span> <span class="s">"\n"</span>.join(r.text <span class="k">for</span> r <span class="k">in</span> results)
+    <span class="c"># → "3 prior Z5 cases at SBI, median 26h. shop@ybl seen in Case#099 (fraud report)."</span>
+    <span class="c"># this string is injected into the Case Brief the LLM sees ↓</span></pre></div>
+
+  <div class="annotate">🧮 <b>Cost honesty:</b> <code>remember()</code> also spends LLM tokens (extraction) — with Gemini's free tier that's ₹0 for our volumes; with Ollama it's ₹0 forever. <code>recall()</code> is cheaper still. The only real spend in the whole system is Sarvam voice.</div>
+</section>
+
+<!-- 4. THE GRAPH -->
+<section id="graph">
+  <span class="kicker">04 · What's actually stored</span>
+  <h2 class="sec-title">The knowledge graph after 3 demo cases</h2>
+  <p class="lede">This is a real picture of the data Cognee writes — nodes are entities, arrows are the facts the LLM extracted. Watch how <b>case #104's recall query walks this graph</b> to produce the agent's real ETA and the fraud flag.</p>
+
+  <div class="kg-wrap">
+    <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#5B7185"/></marker></defs>
+      <!-- edges -->
+      <line x1="150" y1="80" x2="60" y2="160" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="150" y1="80" x2="180" y2="170" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="150" y1="80" x2="300" y2="160" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="180" y1="205" x2="180" y2="245" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="430" y1="90" x2="330" y2="160" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="430" y1="90" x2="470" y2="170" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="620" y1="80" x2="520" y2="165" stroke="#E5484D" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ah)"/>
+      <line x1="620" y1="80" x2="620" y2="170" stroke="#5B7185" stroke-width="1.5" marker-end="url(#ah)"/>
+      <!-- edge labels -->
+      <text x="80" y="115" fill="#7FA5C4" font-size="11" font-family="Segoe UI">code</text>
+      <text x="140" y="135" fill="#7FA5C4" font-size="11" font-family="Segoe UI">bank</text>
+      <text x="245" y="120" fill="#7FA5C4" font-size="11" font-family="Segoe UI">ben_vpa</text>
+      <text x="188" y="232" fill="#7FA5C4" font-size="11" font-family="Segoe UI">resolved_in</text>
+      <text x="360" y="120" fill="#7FA5C4" font-size="11" font-family="Segoe UI">code</text>
+      <text x="465" y="128" fill="#7FA5C4" font-size="11" font-family="Segoe UI">bank</text>
+      <text x="540" y="115" fill="#F08A8D" font-size="11" font-family="Segoe UI" font-weight="700">linked_to ⚠</text>
+      <text x="628" y="132" fill="#7FA5C4" font-size="11" font-family="Segoe UI">amount</text>
+      <!-- nodes -->
+      <g><rect x="90" y="45" width="120" height="42" rx="10" fill="#0E3157" stroke="#00BAF2"/><text x="150" y="63" fill="#fff" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">Case #101 ✓</text><text x="150" y="78" fill="#8FE1FF" font-size="10" text-anchor="middle" font-family="Segoe UI">closed · Z5 · 26h</text></g>
+      <g><rect x="380" y="45" width="110" height="42" rx="10" fill="#0E3157" stroke="#00BAF2"/><text x="435" y="63" fill="#fff" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">Case #102 ✓</text><text x="435" y="78" fill="#8FE1FF" font-size="10" text-anchor="middle" font-family="Segoe UI">closed · Z5 · 28h</text></g>
+      <g><rect x="565" y="40" width="115" height="46" rx="10" fill="#3B0A0A" stroke="#E5484D"/><text x="622" y="58" fill="#fff" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">Case #099 ⚠</text><text x="622" y="73" fill="#F08A8D" font-size="10" text-anchor="middle" font-family="Segoe UI">fraud report</text></g>
+      <g><rect x="10" y="160" width="70" height="34" rx="9" fill="#12333A" stroke="#1E5A66"/><text x="45" y="181" fill="#B8F0FA" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">Z5</text></g>
+      <g><rect x="130" y="170" width="100" height="36" rx="9" fill="#12333A" stroke="#1E5A66"/><text x="180" y="192" fill="#B8F0FA" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">SBI</text></g>
+      <g><rect x="255" y="160" width="115" height="36" rx="9" fill="#12333A" stroke="#1E5A66"/><text x="312" y="182" fill="#B8F0FA" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">shop@ybl</text></g>
+      <g><rect x="440" y="170" width="95" height="36" rx="9" fill="#12333A" stroke="#1E5A66"/><text x="487" y="192" fill="#B8F0FA" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">HDFC</text></g>
+      <g><rect x="585" y="170" width="80" height="36" rx="9" fill="#12333A" stroke="#1E5A66"/><text x="625" y="192" fill="#B8F0FA" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">₹19,000</text></g>
+      <g><rect x="130" y="245" width="110" height="34" rx="9" fill="#0A2E1F" stroke="#0FB27F"/><text x="185" y="266" fill="#A9F2D8" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">26–28h typ.</text></g>
+      <!-- case 104 -->
+      <g><rect x="290" y="285" width="180" height="46" rx="10" fill="#0E3157" stroke="#E8A13C" stroke-width="2"/><text x="380" y="303" fill="#fff" font-size="12" text-anchor="middle" font-family="Segoe UI" font-weight="700">Case #104 (NEW · open)</text><text x="380" y="319" fill="#FFD9A8" font-size="10" text-anchor="middle" font-family="Segoe UI">Z5 · SBI · shop@ybl · ₹2,800</text></g>
+      <line x1="310" y1="285" x2="200" y2="215" stroke="#E8A13C" stroke-width="2" marker-end="url(#ah)"/>
+      <line x1="360" y1="285" x2="320" y2="200" stroke="#E8A13C" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="200" y="270" fill="#FFD9A8" font-size="11" font-family="Segoe UI" font-weight="700">recall() walks →</text>
+      <text x="330" y="255" fill="#FFD9A8" font-size="11" font-family="Segoe UI" font-weight="700">matches</text>
+    </svg>
+  </div>
+  <div class="kg-note">
+    <div class="kg-card"><h5>🧠 What recall() returns for Case #104</h5><p><code>"2 prior Z5 cases at SBI, median 27h — auto-reversal landed both times. Warning: VPA shop@ybl appears in Case#099 (fraud report)."</code> → The agent's first message now carries a <b>real ETA ("~27 hours, 2 similar cases resolved this way")</b> and the loop <b>raises the fraud flag before acting</b>. That's memory earning its keep.</p></div>
+    <div class="kg-card"><h5>🆚 Why not just SQL?</h5><p>SQL needs you to predict every question. A graph answers <i>relationship</i> questions you never designed for: "which VPAs link to fraud-reported cases through shared beneficiaries?", "which bank's stalls repeat?". Same files, but the edges are first-class. (And on stage: <b>"the agent remembers every case it has ever closed"</b> is a sponsor-story sentence SQL can't buy.)</p></div>
+  </div>
+</section>
+
+<!-- 5. AGENT LOOP -->
+<section id="agentloop">
+  <span class="kicker">05 · The AI part we write</span>
+  <h2 class="sec-title">The agent loop — ~80 lines that are the product</h2>
+  <p class="lede">The LLM never runs wild. It sits inside <b>our loop</b>, which owns the tools, the budget of steps, and the hard rails. This skeleton is the heart of the demo — and every line of it is ours.</p>
+
+  <div class="codeblock"><div class="cb-tag">Python · the brain client — Gemini via Vertex on our GCP (no OpenAI, no API key)</div>
+<pre><span class="k">from</span> google <span class="k">import</span> genai
+
+llm = genai.Client(vertexai=<span class="k">True</span>,               <span class="c"># ✨ Vertex AI — our GCP subscription</span>
+                   project=<span class="s">"personal-project-dg21"</span>,
+                   location=<span class="s">"us-central1"</span>)     <span class="c"># auth = gcloud ADC. No key. No OpenAI import.</span>
+
+<span class="k">def</span> <span class="f">llm_chat</span>(prompt_msgs):
+    <span class="k">return</span> llm.models.generate_content(
+        model=<span class="s">"gemini-3-flash"</span>,               <span class="c"># pin exact id from docs at build</span>
+        contents=prompt_msgs,
+        config=genai.types.GenerateContentConfig(
+            tools=TOOL_SPECS))                   <span class="c"># function-calling = tool choice</span></pre></div>
+
+  <div class="codeblock"><div class="cb-tag">Python · backend/agent.py — annotated skeleton</div>
+<pre>SYSTEM = <span class="s">"""You are Sahayak, Paytm's failed-payments agent.
+You get a CASE_BRIEF (JSON). Decide ONE action per turn:
+(a) a tool call, (b) a customer message, or (c) ESCALATE.
+Rules: never claim to reverse money yourself; if fraud_score &gt; 0.7
+or amount &gt; ₹10,000 with first_time_beneficiary → escalate, never act.
+Always quote RRN and real ETA from MEMORY. Reply in customer's language."""</span>
+
+TOOLS = {<span class="s">"check_bank_status"</span>: check_bank_status,   <span class="c"># ← our mock-rail functions</span>
+        <span class="s">"check_npci"</span>:      check_npci,
+        <span class="s">"file_complaint"</span>:  file_complaint,
+        <span class="s">"set_sla_timer"</span>:   set_sla_timer,
+        <span class="s">"send_update"</span>:     send_update,
+        <span class="s">"escalate"</span>:        escalate}
+
+<span class="k">async def</span> <span class="f">run_case</span>(case):                          <span class="c"># ①  our code: brief assembly</span>
+    brief = build_case_brief(case)                   <span class="c">#    15 fields, pre-computed</span>
+    brief[<span class="s">"memory"</span>] = <span class="k">await</span> memory_context(brief) <span class="c"># ②  Cognee recall()→string</span>
+    msgs = [{<span class="s">"role"</span>:<span class="s">"system"</span>,<span class="s">"content"</span>: SYSTEM},
+            {<span class="s">"role"</span>:<span class="s">"user"</span>,<span class="s">"content"</span>: json.dumps(brief)}]
+
+    <span class="k">for</span> turn <span class="k">in</span> range(MAX_TURNS):                     <span class="c"># ③  RAIL: hard step budget</span>
+        r = llm_chat(msgs)                           <span class="c"># ④  ✨ Gemini: the decision</span>
+        <span class="k">if</span> r.tool_call:                              <span class="c"># ⑤  LLM chose a tool</span>
+            fn   = TOOLS[r.tool_call.name]           <span class="c">#    we look it up — only these exist</span>
+            out  = <span class="k">await</span> fn(**r.tool_call.args) <span class="c"># ⑥  OUR code executes it</span>
+            msgs.append(tool_result(out))            <span class="c"># ⑦  result fed back to LLM</span>
+            ui.emit(<span class="s">"thinking"</span>, r.tool_call, out)  <span class="c"># ⑧  thinking-view beat</span>
+        <span class="k">else</span>:                                          <span class="c"># ⑨  LLM chose to speak</span>
+            <span class="k">await</span> send_update(r.text)              <span class="c">#    text → customer channel</span>
+            wav = sarvam_tts(r.text_hi, <span class="s">"bulbul:v3"</span>) <span class="c"># ⑩  🗣️ Sarvam voice note</span>
+            <span class="k">await</span> send_voice(wav)
+            <span class="k">break</span>
+
+    <span class="k">if</span> case.state == <span class="s">"closed"</span>:
+        <span class="k">await</span> cognee.remember(render_case_file(case)) <span class="c"># ⑪ memory grows</span></pre></div>
+
+  <div class="grid g2">
+    <div class="card"><h4>🧩 What's ours</h4><p>The prompt &amp; rules, the tool functions, the loop budget, the brief builder, the guardrails (idempotent complaints, thresholds, the never-list), the UI timeline. <b>The judgment skeleton.</b></p></div>
+    <div class="card"><h4>✨ What's Gemini's</h4><p>Each <code>llm_chat()</code> is one HTTPS call — the decision itself: which tool, or speak, or escalate. Function-calling reliability is why it's the brain; the free tier (~1,500 req/day) is why it's free.</p></div>
+    <div class="card"><h4>🗣️ What's Sarvam's</h4><p>Voice only: <code>sarvam_tts()</code> turns the agent's Hindi line into a WhatsApp voice note; STT turns the customer's voice reply back into text for Gemini.</p></div>
+    <div class="card"><h4>🧠 What's Cognee's</h4><p>Two calls in this file: <code>memory_context()</code> (recall) before deciding, <code>remember()</code> after closing. The graph lives on our disk between them; Gemini does its extraction.</p></div>
+  </div>
+
+  <div class="annotate">🔒 <b>The rails, stated in code:</b> the LLM can only call functions that exist in <code>TOOLS</code>; it gets at most <code>MAX_TURNS</code> steps; <code>file_complaint</code> refuses a second filing for the same RRN (idempotent); and the escalation rule lives in the prompt <i>and</i> as a post-check in our code — so even a hallucinating model cannot spend money or skip the human.</div>
+</section>
+
+<!-- 6. FULL CASE -->
+<section id="fullcase">
+  <span class="kicker">06 · All together now</span>
+  <h2 class="sec-title">One case, end to end — who did what, beat by beat</h2>
+  <p class="lede">Scene 2 (pending past SLA, ₹1,150) through the full machine. This is the sequence the demo will make visible on the thinking-view.</p>
+  <div class="card">
+    <div class="seq">
+      <div class="sstep"><div class="sbody"><b>Payment hangs 31h.</b> Our scheduler's T+1 tick fires → case auto-opens. <span class="who w-ours">our code</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Brief assembled</b> — RRN 4102…155, code T1, debit=YES, sla_due=now. <span class="who w-ours">our code</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Memory consulted:</b> "3 prior T1 cases at this PSP, auto-expiry recovered 2/3, median 31h." Injected into brief. <span class="who w-cognee">cognee recall</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Turn 1 decision:</b> call <code>check_bank_status(rrn)</code>. <span class="who w-gemini">gemini chat</span> → <span class="who w-ours">our tool runs</span> → "debit confirmed, no credit ack" fed back.</div></div>
+      <div class="sstep"><div class="sbody"><b>Turn 2 decision:</b> call <code>check_npci(rrn)</code> → "PENDING since 31h, auto-expiry already attempted". <span class="who w-gemini">gemini</span> + <span class="who w-ours">tool</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Turn 3 decision:</b> rails won't self-heal → <code>file_complaint(rrn, reason)</code> → CMP-338821 created; idempotency guard logs "first filing". <span class="who w-gemini">gemini</span> + <span class="who w-ours">tool</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Turn 4 decision:</b> <code>set_sla_timer("T+3")</code> armed; then speaks. <span class="who w-gemini">gemini</span> + <span class="who w-ours">tool</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Customer hears it first:</b> Hindi WhatsApp text + Bulbul voice note — "कंप्लेंट दर्ज हो गई (CMP-338821), अगला अपडेट कल सुबह 9 बजे।" <span class="who w-sarvam">sarvam tts</span></div></div>
+      <div class="sstep"><div class="sbody"><b>Case remains open on timer;</b> on close → <code>remember(case_file)</code> → graph grows → next T1 case gets a sharper answer. <span class="who w-cognee">cognee remember</span></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;border-left:5px solid var(--cyan)">
+    <h4>🎬 Why this structure demos beautifully</h4>
+    <p style="font-size:13.5px;color:var(--muted)">Every numbered beat above is one row in the thinking-view UI, tagged with its engine (🧩 ours / ✨ Gemini / 🗣️ Sarvam / 🧠 Cognee). The judge doesn't have to trust a claim — they watch the division of labour happen. And when someone asks "so which part is the AI?", the answer is precise: <b>the turns are the AI (Gemini), the cage and the tools are us, the voice is Sarvam, and the experience is memory (Cognee).</b></p>
+  </div>
+</section>
+
+<footer>
+  Built for <b>Team Maverick</b> · Sahayak deep-dive — pairs with <a href="reality.html#engineroom" style="color:#7FE3FF">The Engine Room</a> · Brain: Gemini 3 Flash (<a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" style="color:#7FE3FF">pricing/free tier</a>) · Voice: Sarvam (<a href="https://www.sarvam.ai/api-pricing" target="_blank" style="color:#7FE3FF">pricing</a>) · Memory: Cognee, Apache-2.0 (<a href="https://github.com/topoteretes/cognee" target="_blank" style="color:#7FE3FF">source</a>)
+</footer>
+</body>
+</html>

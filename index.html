@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPI Payments 101 — Visual Crash Course for Sahayak</title>
+<style>
+  :root{
+    --navy:#07203B; --navy2:#0E3157; --cyan:#00BAF2; --cyan-dk:#0091C7;
+    --bg:#F5F9FC; --card:#FFFFFF; --ink:#12263A; --muted:#5B7185;
+    --line:#DCE7F0; --ok:#0FB27F; --okbg:#E6F7F1; --bad:#E5484D; --badbg:#FDECEC;
+    --warn:#E8A13C; --warnbg:#FCF3E4; --purple:#7C5CFF; --purplebg:#EFEBFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  h1,h2,h3,h4{font-family:"Segoe UI",Inter,sans-serif;color:var(--navy);line-height:1.25}
+  a{color:var(--cyan-dk)}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:10px 22px;overflow-x:auto;white-space:nowrap}
+  nav .brand{font-weight:800;color:var(--navy);margin-right:14px;display:flex;align-items:center;gap:8px}
+  nav .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(0,186,242,.18)}
+  nav a.nl{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:20px;transition:.18s}
+  nav a.nl:hover{background:#EDF6FC;color:var(--navy)}
+  nav a.nl.active{background:var(--navy);color:#fff}
+
+  section{max-width:1080px;margin:0 auto;padding:64px 24px 8px}
+  .kicker{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan-dk);background:#E4F6FD;padding:5px 12px;border-radius:20px;margin-bottom:12px}
+  .sec-title{font-size:clamp(26px,4vw,36px);font-weight:800;margin-bottom:8px}
+  .lede{color:var(--muted);font-size:17px;max-width:760px;margin-bottom:28px}
+  .sub{font-size:20px;font-weight:700;margin:34px 0 12px;color:var(--navy)}
+
+  /* HERO */
+  header.hero{background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 55%,#11406e 100%);color:#fff;padding:70px 24px 88px}
+  .hero-inner{max-width:1080px;margin:0 auto}
+  .hero .tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#8FE1FF;background:rgba(0,186,242,.12);border:1px solid rgba(0,186,242,.35);padding:6px 14px;border-radius:20px;margin-bottom:18px}
+  .hero h1{color:#fff;font-size:clamp(30px,5vw,50px);font-weight:800;max-width:820px}
+  .hero h1 em{color:var(--cyan);font-style:normal}
+  .hero p.sub{color:#B9CFE4;font-size:18px;max-width:720px;margin:16px 0 26px}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .hero .chip{font-size:13px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#DFEDF9;padding:6px 13px;border-radius:18px}
+  .hero .chain-demo{margin-top:44px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:22px}
+  .hero .chain-demo .lbl{font-size:12.5px;color:#8FB3D1;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+
+  /* CHAIN (shared visual component) */
+  .chain{display:flex;align-items:stretch;gap:0;min-width:0}
+  .chain .node{flex:1;min-width:78px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;transition:.25s;position:relative}
+  .chain .node .ico{font-size:24px;line-height:1.2}
+  .chain .node .nm{font-size:12.5px;font-weight:800;color:var(--navy);margin-top:3px}
+  .chain .node .rl{font-size:10.5px;color:var(--muted);font-weight:600}
+  .chain .node.hot{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(0,186,242,.15)}
+  .chain .node.flag{border-color:var(--bad);box-shadow:0 0 0 4px rgba(229,72,77,.14)}
+  .chain .node.okk{border-color:var(--ok);box-shadow:0 0 0 4px rgba(15,178,127,.13)}
+  .chain .link{flex:1.1;min-width:46px;display:flex;align-items:center;justify-content:center;position:relative}
+  .chain .link .bar{width:100%;height:4px;border-radius:4px;background:var(--line);position:relative;transition:.25s}
+  .chain .link .bar::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);border-left:8px solid var(--line);border-top:6px solid transparent;border-bottom:6px solid transparent;transition:.25s}
+  .chain .link.flow .bar{background:var(--cyan)}
+  .chain .link.flow .bar::after{border-left-color:var(--cyan)}
+  .chain .link.done .bar{background:var(--ok)}
+  .chain .link.done .bar::after{border-left-color:var(--ok)}
+  .chain .link.broken .bar{background:repeating-linear-gradient(90deg,var(--bad) 0 8px,transparent 8px 14px)}
+  .chain .link.broken .bar::after{border-left-color:var(--bad)}
+  .chain .link .badge{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;padding:2px 9px;border-radius:12px;background:var(--bad);color:#fff;white-space:nowrap}
+  .chain .link .badge.wait{background:var(--warn)}
+  .chain .link .badge.okb{background:var(--ok)}
+  .chain.small .node{min-width:64px;padding:7px 4px}
+  .chain.small .node .ico{font-size:18px}
+  .chain.small .node .nm{font-size:11px}
+  .chain.small .link{flex:1;min-width:30px}
+
+  @keyframes pulseflow{0%,100%{opacity:.35}50%{opacity:1}}
+  .hero .chain .link.flow .bar{animation:pulseflow 1.6s infinite}
+
+  /* CARDS GRID */
+  .grid{display:grid;gap:18px}
+  .g5{grid-template-columns:repeat(5,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:900px){.g5,.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}}
+  @media(max-width:640px){.g5,.g4,.g3,.g2{grid-template-columns:1fr}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(7,32,59,.05)}
+  .card h4{font-size:15.5px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card p{font-size:13.5px;color:var(--muted)}
+  .card .big-ico{font-size:26px}
+
+  /* FLIP CARDS (cast) */
+  .flip{perspective:1100px;cursor:pointer;height:220px}
+  .flip .inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+  .flip.on .inner{transform:rotateY(180deg)}
+  .flip .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:18px;display:flex;flex-direction:column}
+  .flip .front{background:var(--card);border:1px solid var(--line);align-items:center;justify-content:center;text-align:center}
+  .flip .front .big-ico{font-size:40px}
+  .flip .front h4{font-size:16px;margin-top:8px}
+  .flip .front .hint{font-size:11.5px;color:var(--cyan-dk);font-weight:700;margin-top:10px;letter-spacing:.04em;text-transform:uppercase}
+  .flip .back{background:var(--navy);color:#fff;transform:rotateY(180deg);overflow:auto}
+  .flip .back h5{font-size:13px;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .flip .back ul{list-style:none}
+  .flip .back li{font-size:12.5px;padding:3px 0 3px 18px;position:relative;color:#DCEBF7}
+  .flip .back li::before{content:"▸";position:absolute;left:0;color:var(--cyan)}
+
+  /* JOURNEY STEPPER */
+  .stage{background:var(--navy);border-radius:20px;padding:28px 24px 24px;color:#fff}
+  .stage .chain .node{background:#0E3157;border-color:#1D4E80}
+  .stage .chain .node .nm{color:#EAF4FC}
+  .stage .chain .node .rl{color:#7FA5C4}
+  .stage .chain .node.hot{border-color:var(--cyan)}
+  .stage .chain .link .bar{background:#1D4E80}.stage .chain .link .bar::after{border-left-color:#1D4E80}
+  .stage .chain .link.flow .bar{background:var(--cyan)}.stage .chain .link.flow .bar::after{border-left-color:var(--cyan)}
+  .stage .chain .link.done .bar{background:var(--ok)}.stage .chain .link.done .bar::after{border-left-color:var(--ok)}
+  .stage .chain .link.broken .bar{background:repeating-linear-gradient(90deg,var(--bad) 0 8px,transparent 8px 14px)}.stage .chain .link.broken .bar::after{border-left-color:var(--bad)}
+  .step-panel{margin-top:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;min-height:118px}
+  .step-panel .t{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
+  .step-panel .t .n{background:var(--cyan);color:var(--navy);font-size:12px;font-weight:800;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center}
+  .step-panel .d{color:#C4D9EB;font-size:14px;margin-top:6px}
+  .step-panel .d b{color:#fff}
+  .step-panel .code{margin-top:8px;display:inline-block;font-family:ui-monospace,Consolas,monospace;font-size:12px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14);padding:4px 10px;border-radius:8px;color:#8FE1FF}
+  .stage .ctrl{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .btn{border:none;cursor:pointer;font-weight:700;font-size:13.5px;padding:9px 18px;border-radius:22px;transition:.15s}
+  .btn.p{background:var(--cyan);color:var(--navy)} .btn.p:hover{background:#33C8F5}
+  .btn.g{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+  .btn.auto.on{background:var(--ok);color:#fff}
+  .stage .progress{flex:1;height:6px;background:rgba(255,255,255,.12);border-radius:6px;overflow:hidden;min-width:120px}
+  .stage .progress i{display:block;height:100%;background:var(--cyan);transition:.3s}
+  .stage .clock{font-family:ui-monospace,monospace;font-size:13px;color:#8FE1FF;font-weight:700;min-width:64px;text-align:right}
+
+  /* LANES */
+  .lane{border-radius:16px;padding:20px;border:1px solid var(--line)}
+  .lane.msg{background:#EDFAFF;border-color:#B5E8FA}
+  .lane.money{background:#FFF7EA;border-color:#F3DFB6}
+  .lane h4{display:flex;gap:10px;align-items:center;font-size:16px}
+  .lane .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .lane .pl{font-size:12px;font-weight:700;padding:5px 12px;border-radius:16px;background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .lane p{font-size:13.5px;color:#42586C;margin-top:10px}
+
+  /* FIELD GUIDE */
+  .field{display:flex;gap:14px;align-items:flex-start}
+  .field .fico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .field .k{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--cyan-dk);background:#E4F6FD;padding:1px 8px;border-radius:6px;font-weight:700}
+  .field .eg{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--muted);display:block;margin-top:4px}
+  .tagrow{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .mini{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:10px;letter-spacing:.03em}
+  .mini.hold{background:var(--purplebg);color:var(--purple)} .mini.npci{background:#E4F6FD;color:var(--cyan-dk)}
+  .mini.bank{background:var(--okbg);color:var(--ok)} .mini.app{background:var(--warnbg);color:#B47414}
+
+  /* CODES TABLE */
+  .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+  .search{flex:1;min-width:220px;position:relative}
+  .search input{width:100%;padding:11px 14px 11px 38px;border-radius:12px;border:1.5px solid var(--line);font-size:14px;background:#fff;font-family:inherit}
+  .search input:focus{outline:none;border-color:var(--cyan)}
+  .search .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th{background:var(--navy);color:#fff;text-align:left;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;padding:11px 14px}
+  td{padding:12px 14px;border-top:1px solid var(--line);font-size:13.5px;vertical-align:top}
+  tr:hover td{background:#F6FBFE}
+  .code-chip{font-family:ui-monospace,monospace;font-weight:800;padding:3px 10px;border-radius:8px;font-size:13px}
+  .c-bad{background:var(--badbg);color:var(--bad)} .c-warn{background:var(--warnbg);color:#B47414}
+  .c-info{background:var(--purplebg);color:var(--purple)} .c-ok{background:var(--okbg);color:var(--ok)}
+  .leg-pill{font-size:11px;font-weight:800;padding:2px 10px;border-radius:10px;white-space:nowrap}
+  .note{font-size:12.5px;color:var(--muted);margin-top:12px;font-style:italic}
+
+  /* SCENES */
+  .scene{border-radius:16px;border:1px solid var(--line);background:#fff;overflow:hidden}
+  .scene .hd{padding:16px 18px 10px;display:flex;align-items:center;gap:12px}
+  .scene .hd .num{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+  .scene .hd h4{font-size:15.5px}
+  .scene .hd .sub2{font-size:12px;color:var(--muted);font-weight:600}
+  .scene .bd{padding:4px 18px 16px}
+  .scene .chain-wrap{background:#F2F7FB;border-radius:12px;padding:26px 14px 14px;margin:10px 0}
+  .scene .facts{display:flex;flex-wrap:wrap;gap:8px}
+  .scene .facts .f{font-size:12px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--ink)}
+  .scene .acts{margin-top:12px}
+  .scene .acts .a{display:flex;gap:10px;font-size:13px;padding:5px 0;color:#3A4E62}
+  .scene .acts .a .st{font-weight:800;flex-shrink:0;width:86px}
+  .scene .acts .a .st.do{color:var(--ok)} .scene .acts .a .st.warn2{color:#B47414} .scene .acts .a .st.stop{color:var(--bad)}
+
+  /* PLAYBOOK */
+  .steps{position:relative;margin-top:8px}
+  .steps::before{content:"";position:absolute;left:23px;top:10px;bottom:10px;width:3px;background:linear-gradient(var(--cyan),var(--ok));border-radius:3px}
+  .step{display:flex;gap:16px;padding:12px 0;position:relative}
+  .step .n{width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid var(--cyan);color:var(--navy);font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1}
+  .step .body{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;flex:1}
+  .step .body h4{font-size:14.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .step .body p{font-size:13px;color:var(--muted);margin-top:4px}
+  .step .body .when{font-size:11px;font-weight:800;padding:2px 9px;border-radius:10px}
+
+  /* SAHAYAK MOCK */
+  .sahayak-wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+  @media(max-width:900px){.sahayak-wrap{grid-template-columns:1fr}}
+  .phone{background:var(--navy);border-radius:22px;padding:14px;box-shadow:0 18px 44px rgba(7,32,59,.28)}
+  .phone .screen{background:#F0F5F9;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:560px}
+  .phone .top{background:var(--navy);color:#fff;padding:12px 14px;display:flex;gap:10px;align-items:center}
+  .phone .top .av{width:36px;height:36px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:17px}
+  .phone .top .nm2{font-weight:800;font-size:14px}
+  .phone .top .st2{font-size:11px;color:#7FE3FF;font-weight:600}
+  .brief{margin:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}
+  .brief .bt{font-size:11px;font-weight:800;color:var(--cyan-dk);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;display:flex;gap:6px;align-items:center}
+  .brief .row{display:flex;justify-content:space-between;gap:10px;padding:3.5px 0;border-bottom:1px dashed #EDF2F7}
+  .brief .row:last-child{border:none}
+  .brief .k2{color:var(--muted);font-weight:600}
+  .brief .v2{font-weight:700;font-family:ui-monospace,monospace;font-size:11.5px;text-align:right}
+  .v2.ok{color:var(--ok)} .v2.bad{color:var(--bad)} .v2.warn{color:#B47414}
+  .agent-msg{margin:6px 12px;background:linear-gradient(135deg,#00BAF2,#0091C7);color:var(--navy);border-radius:14px 14px 14px 4px;padding:11px 14px;font-size:13px;font-weight:600;max-width:88%;box-shadow:0 4px 12px rgba(0,145,199,.25)}
+  .thinking{margin:8px 12px;background:#fff;border:1px dashed var(--cyan);border-radius:12px;padding:10px 12px;font-size:12px}
+  .thinking .th{font-weight:800;color:var(--cyan-dk);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .thinking .tl{display:flex;gap:8px;align-items:center;padding:3px 0;color:#3A4E62}
+  .thinking .tl .tc{font-family:ui-monospace,monospace;font-size:11px;background:#E4F6FD;border-radius:6px;padding:1px 7px;color:var(--cyan-dk);font-weight:700;white-space:nowrap}
+  .tools h4{margin-bottom:10px}
+  .tool{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .tool:last-child{border:none}
+  .tool .tico{font-size:18px;width:34px;height:34px;border-radius:10px;background:#E4F6FD;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .tool .tn{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;font-weight:700;color:var(--navy)}
+  .tool .td2{font-size:12.5px;color:var(--muted)}
+
+  footer{margin-top:70px;background:var(--navy);color:#8FB3D1;padding:30px 24px;text-align:center;font-size:13px}
+  footer b{color:#fff}
+  .kbd{font-family:ui-monospace,monospace;background:#EEF4F9;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <span class="brand"><span class="dot"></span>UPI 101 · for Sahayak</span>
+  <a class="nl" href="#cast">The Players</a>
+  <a class="nl" href="#journey">The Journey</a>
+  <a class="nl" href="#lanes">Message vs Money</a>
+  <a class="nl" href="#fields">Field Guide</a>
+  <a class="nl" href="#codes">Error Codes</a>
+  <a class="nl" href="#scenes">4 Failure Scenes</a>
+  <a class="nl" href="reality.html" style="color:var(--bad);font-weight:800">⚡ Reality Check</a>
+  <a class="nl" href="#playbook">Backtracking</a>
+  <a class="nl" href="#sahayak">Sahayak's Eyes</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="tag">⚡ Visual crash course · zero banking knowledge needed</span>
+    <h1>How a UPI payment actually works —<br>and <em>where it breaks</em>.</h1>
+    <p class="sub">Everything below is what an AI agent like <b style="color:#fff">Sahayak</b> needs to understand to fight stuck money. Read top to bottom — by the end you'll know the players, the journey, the data at every hop, the failure codes, and exactly what to check first when money goes missing.</p>
+    <div class="chips">
+      <span class="chip">🧑‍🤝‍🧑 5 players</span>
+      <span class="chip">🛣️ 4 hops = 4 failure legs</span>
+      <span class="chip">🔑 RRN — the one number that traces everything</span>
+      <span class="chip">⏱️ Auto-reversal clock: T+1</span>
+      <span class="chip">🤖 What the agent sees before you type</span>
+    </div>
+    <div class="chain-demo">
+      <div class="lbl">The 3-second journey you'll learn — step through it below 👇</div>
+      <div class="chain" style="max-width:760px">
+        <div class="node"><div class="ico">📱</div><div class="nm">You · Paytm</div><div class="rl">app</div></div>
+        <div class="link flow"><div class="bar"></div></div>
+        <div class="node"><div class="ico">🏦</div><div class="nm">PSP Bank</div><div class="rl">gateway</div></div>
+        <div class="link flow"><div class="bar"></div></div>
+        <div class="node"><div class="ico">🔄</div><div class="nm">NPCI</div><div class="rl">the switch</div></div>
+        <div class="link flow"><div class="bar"></div></div>
+        <div class="node"><div class="ico">🏛️</div><div class="nm">Payee Bank</div><div class="rl">credits</div></div>
+        <div class="link flow"><div class="bar"></div></div>
+        <div class="node"><div class="ico">👤</div><div class="nm">Payee</div><div class="rl">gets ₹</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 1. CAST ============ -->
+<section id="cast">
+  <span class="kicker">01 · The Players</span>
+  <h2 class="sec-title">Five actors move your money</h2>
+  <p class="lede">A UPI payment is a relay race between five systems. Each one holds <b>different data</b> — that's why "who knows what" matters when something breaks. <b>Click each card</b> to see the data they hold (this is exactly what Sahayak can pull from each).</p>
+  <div class="grid g5">
+    <div class="flip" onclick="this.classList.toggle('on')">
+      <div class="inner">
+        <div class="face front"><div class="big-ico">📱</div><h4>You + Paytm App</h4><div class="hint">tap to flip ↻</div></div>
+        <div class="face back"><h5>TPAP holds</h5><ul>
+          <li>Your VPA (e.g. dinesh@paytm)</li><li>Full txn history & amounts</li><li>Device ID, login sessions</li><li>Complaint history with 24×7 help</li><li>Beneficiaries you've paid before</li><li>Preferred language</li></ul></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('on')">
+      <div class="inner">
+        <div class="face front"><div class="big-ico">🏦</div><h4>PSP Bank</h4><div class="rl" style="color:var(--muted);font-size:12px">the gateway</div><div class="hint">tap to flip ↻</div></div>
+        <div class="face back"><h5>Gateway holds</h5><ul><li>Every request it forwarded</li><li>PSP reference number</li><li>Response received (or timeout)</li><li>Merchant ID (for shop payments)</li><li>Auth & risk signals per txn</li></ul></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('on')">
+      <div class="inner">
+        <div class="face front"><div class="big-ico">🔄</div><h4>NPCI</h4><div class="rl" style="color:var(--muted);font-size:12px">the switch</div><div class="hint">tap to flip ↻</div></div>
+        <div class="face back"><h5>The switch holds</h5><ul><li><b>RRN</b> — the master trace key</li><li>Routing logs: which banks, when</li><li><b>Response codes</b> (Z2, Z5, Z9…)</li><li>Settlement position per bank</li><li>VPA directory (valid address?)</li></ul></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('on')">
+      <div class="inner">
+        <div class="face front"><div class="big-ico">🏛️</div><h4>Your Bank</h4><div class="rl" style="color:var(--muted);font-size:12px">remitter</div><div class="hint">tap to flip ↻</div></div>
+        <div class="face back"><h5>Remitter bank holds</h5><ul><li>Account balance & the debit entry</li><li>Whether debit actually happened</li><li>Holds / risk blocks on account</li><li>Reversal when credited back</li></ul></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('on')">
+      <div class="inner">
+        <div class="face front"><div class="big-ico">👤</div><h4>Payee's Bank</h4><div class="rl" style="color:var(--muted);font-size:12px">beneficiary</div><div class="hint">tap to flip ↻</div></div>
+        <div class="face back"><h5>Beneficiary holds</h5><ul><li>Does this VPA exist? Active?</li><li>Did the credit land?</li><li>Account limits / frozen status</li><li>Fraud reports on this account</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <p class="note">💡 The one-line version: <b>Paytm (the app) never touches the money</b> — it's the messenger. Banks hold the money. NPCI is the traffic cop in the middle that routes and records everything. Paytm app works as a "TPAP" (third-party app) riding on partner banks like Axis, HDFC, SBI, YES as its PSPs.</p>
+</section>
+
+<!-- ============ 2. JOURNEY ============ -->
+<section id="journey">
+  <span class="kicker">02 · The Journey</span>
+  <h2 class="sec-title">A payment's 3-second life, step by step</h2>
+  <p class="lede">Press <b>Next</b> (or ▶ Auto) to walk one ₹2,800 payment from your phone to the payee. Watch which <b>link</b> carries the message at each step — when money gets stuck, it's always stuck <b>on one of these links</b>.</p>
+
+  <div class="stage">
+    <div class="chain" id="jchain">
+      <div class="node" data-n="0"><div class="ico">📱</div><div class="nm">You · Paytm</div><div class="rl">enter & PIN</div></div>
+      <div class="link" data-l="1"><div class="bar"></div></div>
+      <div class="node" data-n="1"><div class="ico">🏦</div><div class="nm">PSP Bank</div><div class="rl">gateway</div></div>
+      <div class="link" data-l="2"><div class="bar"></div></div>
+      <div class="node" data-n="2"><div class="ico">🔄</div><div class="nm">NPCI</div><div class="rl">switch</div></div>
+      <div class="link" data-l="3"><div class="bar"></div></div>
+      <div class="node" data-n="3"><div class="ico">🏛️</div><div class="nm">Payee Bank</div><div class="rl">credits ₹</div></div>
+      <div class="link" data-l="4"><div class="bar"></div></div>
+      <div class="node" data-n="4"><div class="ico">👤</div><div class="nm">Payee</div><div class="rl">sees money</div></div>
+    </div>
+    <div class="step-panel" id="jpanel"></div>
+    <div class="ctrl">
+      <button class="btn g" onclick="jstep(-1)">← Back</button>
+      <button class="btn p" onclick="jstep(1)">Next →</button>
+      <button class="btn g auto" id="jauto" onclick="jtoggleAuto()">▶ Auto</button>
+      <div class="progress"><i id="jbar"></i></div>
+      <div class="clock" id="jclock">t = 0.0s</div>
+    </div>
+  </div>
+
+  <div class="sub">🔍 What to notice</div>
+  <div class="grid g3">
+    <div class="card"><h4>⚡ Steps 2–4 are the money legs</h4><p>Between PSP → NPCI → payee bank, your account is debited and the payee's is credited. If ANY acknowledgement gets lost here, the payment shows "Pending" — this is the stuck zone.</p></div>
+    <div class="card"><h4>🧾 Every hop writes a log</h4><p>Each system stamps the transaction with its own reference + timestamp. Stacked together they form the audit trail — that's what "tracing" a payment means.</p></div>
+    <div class="card"><h4>✅ The ✓ you see is the LAST message</h4><p>Your app shows "Success" only after the final acknowledgement travels all the way back. Until then: spinner. The money may already be debited while you stare at that spinner.</p></div>
+  </div>
+</section>
+
+<!-- ============ 3. LANES ============ -->
+<section id="lanes">
+  <span class="kicker">03 · Message vs Money</span>
+  <h2 class="sec-title">Why "debit ho gaya, credit nahi" is even possible</h2>
+  <p class="lede">The trick to understanding stuck payments: <b>two different things move at two different speeds</b>. The <b>instructions</b> fly instantly, the <b>actual interbank settlement</b> happens in periodic batches. Your bank balance is a ledger promise, not a truck of cash.</p>
+  <div class="grid g2">
+    <div class="lane msg">
+      <h4>📨 Message lane — instant, per transaction</h4>
+      <div class="pillrow"><span class="pl">"Debit ₹2,800 from A"</span><span class="pl">"Debit done ✓"</span><span class="pl">"Credit ₹2,800 to B"</span><span class="pl">"Credit done ✓"</span></div>
+      <p>Each instruction + acknowledgement travels bank → NPCI → bank in under a second. <b>Bank balances update off these messages immediately</b> — that's why UPI feels instant.</p>
+    </div>
+    <div class="lane money">
+      <h4>💰 Money lane — batched, net settlement</h4>
+      <div class="pillrow"><span class="pl">🏦 Bank A owes ₹41,20,300 net</span><span class="pl">⏰ settles in batches</span><span class="pl">🏛️ to Bank B via RBI books</span></div>
+      <p>Behind the scenes, NPCI nets thousands of transactions between two banks and moves <b>one net amount</b> per settlement window. Customer-level, you never wait for this — your ledger entry is the promise.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:18px;border-left:5px solid var(--warn)">
+    <h4>🧠 The mental model that matters for Sahayak</h4>
+    <p style="font-size:14px">"Debited but not credited" = <b>the debit message succeeded, but somewhere on the credit path a message failed or got lost</b> (response code Z5/Z9/Z6…). The system then owes you a reversal — NPCI rules push banks to auto-reverse by <b>T+1</b> (usually within hours, worst case ~3 days). A stuck payment is really a <b>broken promise with a legal deadline</b>. That deadline is the agent's weapon.</p>
+  </div>
+</section>
+
+<!-- ============ 4. FIELDS ============ -->
+<section id="fields">
+  <span class="kicker">04 · Field Guide</span>
+  <h2 class="sec-title">The data points — who holds them, what they mean</h2>
+  <p class="lede">These are the fields Sahayak's <b>Case Brief</b> is built from. The color tag tells you which player holds the source of truth. Together they answer: <i>what happened, where, when, and how abnormal is this?</i></p>
+  <div class="grid g3">
+    <div class="card field"><div class="fico" style="background:var(--warnbg)">📱</div><div><h4>Transaction ID</h4><span class="k">txn_id</span><p>Paytm's own ID for the payment, from the app's ledger. What you see in your passbook.</p><span class="eg">e.g. 553120887712</span><div class="tagrow"><span class="mini app">APP</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:#E4F6FD">🔑</div><div><h4>RRN — the master key</h4><span class="k">rrn / utr</span><p><b>12-digit Retrieval Reference Number.</b> The ONE number every bank and NPCI can trace a UPI payment by. Complaints are filed with this. In UPI, RRN and UTR mean the same thing.</p><span class="eg">e.g. 410223689155</span><div class="tagrow"><span class="mini npci">NPCI</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:var(--purplebg)">🪪</div><div><h4>VPA (UPI ID)</h4><span class="k">vpa</span><p>Virtual payment address — an alias that hides the bank account behind it. Payer's and payee's VPA + which bank hosts each.</p><span class="eg">e.g. dinesh@paytm → rahul@oksbi</span><div class="tagrow"><span class="mini hold">BOTH BANKS</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:var(--badbg)">⚡</div><div><h4>Response code</h4><span class="k">resp_code</span><p>NPCI's verdict on what went wrong (Z5, Z9, Z6…). <b>This is the agent's single most diagnostic field</b> — it names the broken leg. See the code table below.</p><span class="eg">e.g. Z5 = beneficiary bank tech decline</span><div class="tagrow"><span class="mini npci">NPCI</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:var(--okbg)">⏱️</div><div><h4>Timestamps</h4><span class="k">ts_initiated / ts_debited / ts_credit / ts_reversed</span><p>When each event happened. Differences between them = how long the money has been stuck. Drives every SLA timer.</p><span class="eg">e.g. debited 14:02:11, still not credited 19:40:00</span><div class="tagrow"><span class="mini bank">BANKS</span><span class="mini npci">NPCI</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:var(--okbg)">₹</div><div><h4>Amount & direction</h4><span class="k">amount / direction</span><p>₹ value + whether it's person-to-person (P2P) or person-to-merchant (P2M). Abnormal-amount detection uses the user's own history.</p><span class="eg">e.g. ₹19,000 vs usual ₹500–2,000 band</span><div class="tagrow"><span class="mini app">APP</span><span class="mini bank">BANK</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:var(--warnbg)">🔁</div><div><h4>Beneficiary history</h4><span class="k">is_first_time / prior_count</span><p>Has this user ever paid this VPA before? <b>First-time + large amount</b> is the classic wrong-account shape. Pure app-side data.</p><span class="eg">e.g. first_time: true, amount_abnormal: true</span><div class="tagrow"><span class="mini app">APP</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:var(--badbg)">🚩</div><div><h4>Risk flags</h4><span class="k">fraud_reports / device_match / velocity</span><p>Payee VPA fraud-report count, is this the usual device/location, how many txns today. Decides auto-act vs escalate.</p><span class="eg">e.g. beneficiary flagged 14× in 30 days</span><div class="tagrow"><span class="mini app">APP</span><span class="mini bank">BANK</span></div></div></div>
+    <div class="card field"><div class="fico" style="background:#E4F6FD">🧾</div><div><h4>Complaint record</h4><span class="k">complaint_id / sla_due</span><p>Existing tickets with the 24×7 helpline, who filed what, and when each escalation timer expires. Stops duplicate complaints.</p><span class="eg">e.g. CMP-338821 filed T+0, chase due T+1</span><div class="tagrow"><span class="mini app">APP</span><span class="mini npci">NPCI</span></div></div></div>
+  </div>
+</section>
+
+<!-- ============ 5. CODES ============ -->
+<section id="codes">
+  <span class="kicker">05 · Error Codes</span>
+  <h2 class="sec-title">NPCI response codes — the failure alphabet</h2>
+  <p class="lede">When a payment fails, the response code tells you <b>which leg broke and why</b>. Filter by the broken leg — this is the exact table our mock sandbox uses to seed the four demo scenes. <span style="font-style:italic">(Simplified meanings — enough to be dangerous, exactly what the demo needs.)</span></p>
+  <div class="toolbar">
+    <div class="search"><span class="si">🔎</span><input id="codeq" placeholder="Search code, meaning, or leg… e.g. 'Z9' or 'wrong VPA'"></div>
+  </div>
+  <table id="codetbl">
+    <thead><tr><th style="width:90px">Code</th><th>What it means</th><th style="width:150px">Broken leg</th><th style="width:110px">Money left you?</th><th style="width:120px">Sahayak scene</th></tr></thead>
+    <tbody>
+      <tr><td><span class="code-chip c-bad">Z9</span></td><td>Beneficiary VPA validation failed — wrong/inactive UPI ID</td><td><span class="leg-pill" style="background:var(--purplebg);color:var(--purple)">Payee bank</span></td><td>Maybe (held)</td><td><b>Scene 4</b> wrong account</td></tr>
+      <tr><td><span class="code-chip c-bad">Z5</span></td><td>Technical decline at beneficiary bank — credit couldn't process</td><td><span class="leg-pill" style="background:var(--purplebg);color:var(--purple)">Payee bank</span></td><td><b>Yes — debit done</b></td><td><b>Scene 1</b> auto-reversal</td></tr>
+      <tr><td><span class="code-chip c-warn">Z6</span></td><td>Switch (NPCI) unavailable / timeout — message lost in the middle</td><td><span class="leg-pill" style="background:#E4F6FD;color:var(--cyan-dk)">NPCI switch</span></td><td>Maybe</td><td><b>Scene 2</b> pending &gt; SLA</td></tr>
+      <tr><td><span class="code-chip c-bad">Z2</span></td><td>Declined by remitter bank — risk rule, limit, or block</td><td><span class="leg-pill" style="background:var(--okbg);color:var(--ok)">Your bank</span></td><td>No</td><td>— (clean fail)</td></tr>
+      <tr><td><span class="code-chip c-warn">Z8</span></td><td>Credit would exceed beneficiary's account limit / caps</td><td><span class="leg-pill" style="background:var(--purplebg);color:var(--purple)">Payee bank</span></td><td><b>Yes — debit done</b></td><td><b>Scene 1</b> auto-reversal</td></tr>
+      <tr><td><span class="code-chip c-bad">U16</span></td><td>Beneficiary VPA blocked / on fraud list</td><td><span class="leg-pill" style="background:var(--purplebg);color:var(--purple)">Payee bank</span></td><td>Maybe (held)</td><td><b>Scene 4</b> escalate</td></tr>
+      <tr><td><span class="code-chip c-info">U30</span></td><td>Invalid input — wrong UPI PIN, malformed request. Nothing moved.</td><td><span class="leg-pill" style="background:var(--warnbg);color:#B47414">App / PSP</span></td><td>No</td><td>— (clean fail)</td></tr>
+      <tr><td><span class="code-chip c-warn">U50</span></td><td>Technical issue at remitter bank <i>after</i> debit — the ugly one</td><td><span class="leg-pill" style="background:var(--okbg);color:var(--ok)">Your bank</span></td><td><b>Yes — debit done</b></td><td><b>Scene 2</b> pending &gt; SLA</td></tr>
+      <tr><td><span class="code-chip c-warn">T1*</span></td><td>No response at all — payment hangs "Pending". (*our sandbox-only pseudo-code; real systems just show PENDING)</td><td><span class="leg-pill" style="background:#E4F6FD;color:var(--cyan-dk)">NPCI switch</span></td><td>Unknown → check</td><td><b>Scene 2</b> pending &gt; SLA</td></tr>
+      <tr><td><span class="code-chip c-ok">—</span></td><td>No code + SUCCESS everywhere, but wrong VPA typed — every leg worked; only relationship data catches it</td><td><span class="leg-pill" style="background:var(--badbg);color:var(--bad)">None — human error</span></td><td>Yes — delivered</td><td><b>Scene 4</b> escalate</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The pattern to remember: <b>clean codes</b> (U30, Z2) = money never left, just retry. <b>Dirty codes</b> (Z5, Z8, U50) = debit done, credit failed → reversal owed. <b>No code</b> (T1/Pending) = nobody knows yet → status checks first. <b>No code + success</b> = wrong account, the scariest one.</p>
+</section>
+
+<!-- ============ 6. SCENES ============ -->
+<section id="scenes">
+  <span class="kicker">06 · The Four Failure Scenes</span>
+  <h2 class="sec-title">Every stuck payment is one of these four pictures</h2>
+  <p class="lede">Each card = one scripted demo scene. Red dashed link = the broken leg. This is the visual the agent's "thinking view" will reconstruct in real time.</p>
+  <div class="grid g2">
+
+    <div class="scene">
+      <div class="hd"><div class="num" style="background:var(--cyan-dk)">1</div><div><h4>Debited, not credited</h4><div class="sub2">₹2,800 · code Z5 — payee bank tech decline</div></div></div>
+      <div class="bd">
+        <div class="chain-wrap"><div class="chain small">
+          <div class="node okk"><div class="ico">📱</div><div class="nm">You</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🏦</div><div class="nm">PSP</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🔄</div><div class="nm">NPCI</div></div>
+          <div class="link broken"><div class="bar"></div><span class="badge">✕ credit failed</span></div>
+          <div class="node flag"><div class="ico">🏛️</div><div class="nm">Payee bank</div></div>
+          <div class="link"><div class="bar"></div></div>
+          <div class="node"><div class="ico">👤</div><div class="nm">Payee</div></div>
+        </div></div>
+        <div class="facts"><span class="f">💸 debited 14:02</span><span class="f">⏱️ 4h stuck</span><span class="f">🔁 reversal owed by T+1</span></div>
+        <div class="acts">
+          <div class="a"><span class="st do">Agent does</span><span>verify debit + failed credit → confirm auto-reversal initiated → track it landing → message customer "₹2,800 back by tomorrow 14:02" → close</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <div class="hd"><div class="num" style="background:var(--warn)">2</div><div><h4>Pending past SLA</h4><div class="sub2">₹1,150 · code T1/Z6/U50 — lost in the middle</div></div></div>
+      <div class="bd">
+        <div class="chain-wrap"><div class="chain small">
+          <div class="node okk"><div class="ico">📱</div><div class="nm">You</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🏦</div><div class="nm">PSP</div></div>
+          <div class="link flow" style="animation:pulseflow 1.6s infinite"><div class="bar"></div><span class="badge wait">⏳ no answer</span></div>
+          <div class="node hot"><div class="ico">🔄</div><div class="nm">NPCI</div></div>
+          <div class="link"><div class="bar"></div></div>
+          <div class="node"><div class="ico">🏛️</div><div class="nm">Payee bank</div></div>
+          <div class="link"><div class="bar"></div></div>
+          <div class="node"><div class="ico">👤</div><div class="nm">Payee</div></div>
+        </div></div>
+        <div class="facts"><span class="f">🤷 status: PENDING</span><span class="f">⏱️ 31h &gt; SLA</span><span class="f">🧾 RRN 4102…155</span></div>
+        <div class="acts">
+          <div class="a"><span class="st do">Agent does</span><span>query bank status → query NPCI → still unknown → <b>files the complaint itself</b> with RRN → arms T+1 / T+3 chase timers → sends progress update every step</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <div class="hd"><div class="num" style="background:var(--purple)">3</div><div><h4>Duplicate / partial debit</h4><div class="sub2">₹640 ×2, same RRN window — retry gone wrong</div></div></div>
+      <div class="bd">
+        <div class="chain-wrap"><div class="chain small">
+          <div class="node okk"><div class="ico">📱</div><div class="nm">You</div></div>
+          <div class="link done"><div class="bar"></div><span class="badge okb">txn A ✓</span></div>
+          <div class="node okk"><div class="ico">🏦</div><div class="nm">PSP</div></div>
+          <div class="link broken"><div class="bar"></div><span class="badge">txn B ✕ orphan</span></div>
+          <div class="node hot"><div class="ico">🔄</div><div class="nm">NPCI</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🏛️</div><div class="nm">Payee bank</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">👤</div><div class="nm">Payee</div></div>
+        </div></div>
+        <div class="facts"><span class="f">🧾 same amount, seconds apart</span><span class="f">💸 one debit orphaned</span></div>
+        <div class="acts">
+          <div class="a"><span class="st do">Agent does</span><span>spot the pair in txn history → classify the orphan debit → initiate correction + reversal for the extra one → confirm → close with a plain-English (or Hindi) explanation</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <div class="hd"><div class="num" style="background:var(--bad)">4</div><div><h4>Wrong account / fraud-shaped</h4><div class="sub2">₹19,000 · first-time VPA + abnormal amount (Z9/U16 or clean)</div></div></div>
+      <div class="bd">
+        <div class="chain-wrap"><div class="chain small">
+          <div class="node okk"><div class="ico">📱</div><div class="nm">You</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🏦</div><div class="nm">PSP</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🔄</div><div class="nm">NPCI</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node okk"><div class="ico">🏛️</div><div class="nm">Payee bank</div></div>
+          <div class="link done"><div class="bar"></div></div>
+          <div class="node flag"><div class="ico">👤</div><div class="nm">Wrong payee 🚩</div></div>
+        </div></div>
+        <div class="facts"><span class="f">✅ all legs SUCCESS</span><span class="f">🚩 first_time: true</span><span class="f">📈 amount 9.5× usual</span><span class="f">⚑ VPA fraud-reported</span></div>
+        <div class="acts">
+          <div class="a"><span class="st stop">Agent stops</span><span>enough fraud signal → <b>will NOT auto-act on ₹19k</b> → raises ONE alert with the complete case file → tells customer what's happening and what's next</span></div>
+          <div class="a"><span class="st warn2">Why stop</span><span>hard rails where money + fraud overlap: reversal of a *successful* payment needs human authority, not an agent</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="reality.html" style="text-decoration:none;display:block;margin-top:24px;background:linear-gradient(140deg,#3B0A0A,#07203B 60%);border-radius:18px;padding:24px 26px;color:#fff">
+    <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FFB27A;margin-bottom:6px">⚡ Next: Reality Check — the question that decides the pitch</div>
+    <div style="font-size:19px;font-weight:800;color:#fff">"If UPI returns the money by itself… why do support humans exist?"</div>
+    <div style="font-size:13.5px;color:#C9D9E8;margin-top:6px">What the rails fix automatically · where humans actually sit today · the anxiety-gap timeline · the honest automatability meters · the 30-second judge answer →</div>
+  </a>
+</section>
+
+<!-- ============ 7. PLAYBOOK ============ -->
+<section id="playbook">
+  <span class="kicker">07 · The Backtracking Playbook</span>
+  <h2 class="sec-title">Money is stuck. What do you check, in what order?</h2>
+  <p class="lede">This is the exact order a human agent follows today (and what Sahayak automates). The discipline: <b>establish facts before touching anything</b> — status first, then trace, then timers, then escalate.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="body"><h4>Read the status pair <span class="when" style="background:#E4F6FD;color:var(--cyan-dk)">always first</span></h4><p>App says what? (SUCCESS / PENDING / FAILURE) vs bank statement says what? (debited or not?). Four combinations, each pointing at a different scene. A FAILURE + debited statement = reversal owed, full stop.</p></div></div>
+    <div class="step"><div class="n">2</div><div class="body"><h4>Grab the trace kit <span class="when" style="background:var(--purplebg);color:var(--purple)">RRN + amount + timestamp</span></h4><p>RRN is the key every system can look up. Without it nobody can trace anything. This is why the agent collects it into the case file before acting.</p></div></div>
+    <div class="step"><div class="n">3</div><div class="body"><h4>Query down the chain <span class="when" style="background:#E4F6FD;color:var(--cyan-dk)">status APIs</span></h4><p>Ask PSP → NPCI → beneficiary bank: "did you see RRN …155?" The first one that says "no" marks the broken leg. The response code usually predicts this — the queries confirm it.</p></div></div>
+    <div class="step"><div class="n">4</div><div class="body"><h4>Start the reversal clock <span class="when" style="background:var(--okbg);color:var(--ok)">T+1 rule</span></h4><p>Debited-but-failed payments must auto-reverse by T+1 (usually within hours; ~3 days worst case). If the clock has run out — that's a genuine grievance, escalate instead of waiting.</p></div></div>
+    <div class="step"><div class="n">5</div><div class="body"><h4>File once, then chase <span class="when" style="background:var(--warnbg);color:#B47414">complaint discipline</span></h4><p>Complaint with the PSP (Paytm 24×7) with RRN attached → they route to the bank → NPCI portal escalation if it stalls. One complaint, tracked with timers — not five angry duplicate tickets.</p></div></div>
+    <div class="step"><div class="n">6</div><div class="body"><h4>Last resorts <span class="when" style="background:var(--badbg);color:var(--bad)">only if ignored 30 days</span></h4><p>Bank must resolve within 30 days; after that the RBI Ombudsman for digital payments takes the case. The existence of this ladder is why SLA timers matter — the agent knows when each rung unlocks.</p></div></div>
+  </div>
+</section>
+
+<!-- ============ 8. SAHAYAK ============ -->
+<section id="sahayak">
+  <span class="kicker">08 · Sahayak's Eyes</span>
+  <h2 class="sec-title">What the agent knows before you type a word</h2>
+  <p class="lede">The payoff of everything above. When the customer opens the failed-payment chat, the backend has already assembled a <b>Case Brief</b> — ~15 pre-selected fields, not a data dump — and the agent has a belt of tools it calls as it thinks. This is the demo screen.</p>
+  <div class="sahayak-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="top">
+          <div class="av">🤖</div>
+          <div><div class="nm2">Sahayak · Payments Assistant</div><div class="st2">● case already loaded — RRN 4102…155</div></div>
+        </div>
+        <div class="brief">
+          <div class="bt">📄 Pre-loaded case brief <span style="color:#9AB2C6;font-weight:600;text-transform:none;letter-spacing:0">(injected at chat-open, before any message)</span></div>
+          <div class="row"><span class="k2">customer</span><span class="v2">Dinesh G · full-KYC · prefers हिंदी</span></div>
+          <div class="row"><span class="k2">payment</span><span class="v2 bad">₹1,150 · PENDING 31h</span></div>
+          <div class="row"><span class="k2">route</span><span class="v2">dinesh@paytm → shop@ybl</span></div>
+          <div class="row"><span class="k2">rrn</span><span class="v2">410223689155</span></div>
+          <div class="row"><span class="k2">resp_code</span><span class="v2 warn">T1 — no response</span></div>
+          <div class="row"><span class="k2">debit?</span><span class="v2 bad">YES · 14:02:11</span></div>
+          <div class="row"><span class="k2">failure state</span><span class="v2 warn">PENDING &gt; SLA (scene 2)</span></div>
+          <div class="row"><span class="k2">first_time payee</span><span class="v2 ok">No · regular merchant</span></div>
+          <div class="row"><span class="k2">prior similar</span><span class="v2">2 cases · avg fix 26h</span></div>
+          <div class="row"><span class="k2">sla_due</span><span class="v2 warn">T+1 chase due NOW</span></div>
+        </div>
+        <div class="thinking">
+          <div class="th">🧠 Agent thinking — visible timeline</div>
+          <div class="tl"><span class="tc">check_bank(rrn)</span><span>debit confirmed, no credit ack</span></div>
+          <div class="tl"><span class="tc">check_npci(rrn)</span><span>switch shows PENDING 31h</span></div>
+          <div class="tl"><span class="tc">file_complaint(rrn)</span><span>CMP-338821 filed ✓</span></div>
+          <div class="tl"><span class="tc">set_timer(T+1)</span><span>chase armed · next ping 09:00</span></div>
+        </div>
+        <div class="agent-msg">नमस्ते दिनेश 🙏 आपका ₹1,150 का भुगतान 31 घंटे से लंबित है। मैंने कंप्लेंट दर्ज कर दी है (CMP-338821) और बैंक से पीछा करने का टाइमर लगा दिया है। अगला अपडेट कल सुबह 9 बजे — या जैसे ही पैसा वापस आएगा। 💪</div>
+      </div>
+    </div>
+    <div>
+      <div class="card tools">
+        <h4>🧰 The tool belt — each call is a visible thinking step</h4>
+        <div class="tool"><div class="tico">🏦</div><div><div class="tn">check_bank_status(rrn)</div><div class="td2">Did the debit land? Any hold? Queries the remitter bank sandbox.</div></div></div>
+        <div class="tool"><div class="tico">🔄</div><div><div class="tn">check_npci(rrn)</div><div class="td2">What does the switch see? Settled, pending, or unknown.</div></div></div>
+        <div class="tool"><div class="tico">🧾</div><div><div class="tn">file_complaint(rrn, reason)</div><div class="td2">Files with the mock NPCI complaint desk. Writes a real record.</div></div></div>
+        <div class="tool"><div class="tico">⏱️</div><div><div class="tn">set_sla_timer(hours)</div><div class="td2">Arms the T+1/T+3 chase. Fires on its own — no human memory needed.</div></div></div>
+        <div class="tool"><div class="tico">🚩</div><div><div class="tn">check_beneficiary(vpa)</div><div class="td2">First-time? Fraud-reported? Feeds the act-vs-escalate gate.</div></div></div>
+        <div class="tool"><div class="tico">📣</div><div><div class="tn">send_update(channel, lang)</div><div class="td2">WhatsApp / SMS / voice (Sarvam). The customer-facing beat of every step.</div></div></div>
+        <div class="tool"><div class="tico">🛑</div><div><div class="tn">escalate(case_file)</div><div><div class="td2">The ~15% path. One alert, complete evidence attached, human decides.</div></div></div>
+      </div>
+      <div class="card" style="margin-top:16px;border-left:5px solid var(--cyan)">
+        <h4>🎬 Why this demos well</h4>
+        <p style="font-size:13.5px">Judge clicks the agent → brief is already loaded (no "let me look up your account" theater) → every tool call in the thinking timeline maps to a real hop you now understand → the restraint in Scene 4 reads as intelligence, not limitation. <b>The whole site you just read IS the architecture.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built for <b>Team Maverick</b> · Sahayak — Paytm Build for India, Mumbai · this page is the shared mental model for the build, not a customer artifact.
+</footer>
+
+<script>
+/* ---------- Journey stepper ---------- */
+const jsteps=[
+ {t:"Ready — you're paying ₹2,800",d:"You've typed the payee's VPA and amount. You enter your <b>UPI PIN</b> — this is you authorizing <b>your bank</b> to move money. The PIN never goes to Paytm's servers; it's validated at your bank.",code:"initiate(amount=2800, to='shop@ybl', pin=****)",l:[],n:[0]},
+ {t:"App → PSP bank: 'forward this'",d:"The Paytm app hands the signed request to its <b>PSP bank</b> (its banking partner — the licensed gateway). The app itself is just a messenger; it can't touch money.",code:"POST /upi/pay → PSP · ref PSP-88231",l:[1],n:[0,1]},
+ {t:"NPCI validates the address",d:"The switch checks the payee's VPA in its directory: does <b>shop@ybl exist and is it active?</b> If not → code <b>Z9</b>, payment dies right here (Scene 4 territory).",code:"resolve_vpa('shop@ybl') → OK · hosted by Yes Bank",l:[2],n:[1,2]},
+ {t:"Your bank debits ₹2,800",d:"NPCI asks <b>your bank</b>: debit please. Balance checked, risk rules run, ledger marked. If the bank declines → <b>Z2</b> (clean fail, money never left). Here it succeeds — <b>from this moment, your ₹2,800 is in limbo-land until credited</b>.",code:"debit(2800) → SUCCESS · ts 14:02:11",l:[2],n:[2]},
+ {t:"NPCI → payee bank: 'credit this'",d:"Credit instruction routes to the payee's bank. It credits the account and acks back. If it fails here → <b>Z5/Z8</b> with debit already done = <b>Scene 1, reversal owed (T+1)</b>. If no answer at all → <b>T1, Scene 2</b>.",code:"credit(2800) → SUCCESS · ts 14:02:13",l:[3],n:[2,3,4]},
+ {t:"✓ Success — and the ack travels home",d:"'Credit done' flows back payee-bank → NPCI → PSP → your app shows the ✓. Total elapsed: ~2–4 seconds. Every hop logged a timestamp + reference — that stack of logs is what any trace (or Sahayak) walks.",code:"ack chain complete · txn SUCCESS · rrn 410223689155",l:[1,2,3,4],n:[0,1,2,3,4]}
+];
+let ji=0,jtimer=null;
+const jpanel=document.getElementById('jpanel'),jbar=document.getElementById('jbar'),jclock=document.getElementById('jclock');
+const times=["t = 0.0s","t = 0.2s","t = 0.5s","t = 0.9s","t = 1.8s","t = 2.6s"];
+function jrender(){
+  const s=jsteps[ji];
+  document.querySelectorAll('#jchain .link').forEach(el=>{el.classList.remove('flow','done','broken');const id=+el.dataset.l;const order=s.l.indexOf(id);if(order>-1){el.classList.add(order===s.l.length-1?'flow':'done')}});
+  document.querySelectorAll('#jchain .node').forEach(el=>{el.classList.toggle('hot',s.n.includes(+el.dataset.n))});
+  jpanel.innerHTML=`<div class="t"><span class="n">${ji}</span>${s.t}</div><div class="d">${s.d}</div><div class="code">${s.code}</div>`;
+  jbar.style.width=(ji/(jsteps.length-1)*100)+'%';jclock.textContent=times[ji];
+}
+function jstep(d){ji=Math.min(jsteps.length-1,Math.max(0,ji+d));jrender();if(ji===jsteps.length-1)jstopAuto()}
+function jtoggleAuto(){jtimer?jstopAuto():jstartAuto()}
+function jstartAuto(){document.getElementById('jauto').classList.add('on');document.getElementById('jauto').textContent='⏸ Pause';if(ji===jsteps.length-1)ji=-1;jtimer=setInterval(()=>jstep(1),3400)}
+function jstopAuto(){clearInterval(jtimer);jtimer=null;const b=document.getElementById('jauto');b.classList.remove('on');b.textContent='▶ Auto'}
+jrender();
+
+/* ---------- Codes filter ---------- */
+document.getElementById('codeq').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  document.querySelectorAll('#codetbl tbody tr').forEach(tr=>{
+    tr.style.display=tr.textContent.toLowerCase().includes(q)?'':'none';
+  });
+});
+
+/* ---------- Nav active on scroll ---------- */
+const secs=[...document.querySelectorAll('section[id]')];
+const nls=[...document.querySelectorAll('nav a.nl')];
+window.addEventListener('scroll',()=>{
+  let cur=null;
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-140)cur=s.id});
+  nls.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+},{passive:true});
+</script>
+</body>
+</html>

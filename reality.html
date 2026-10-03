@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reality Check — Where Humans Actually Fit · Sahayak</title>
+<style>
+  :root{
+    --navy:#07203B; --navy2:#0E3157; --cyan:#00BAF2; --cyan-dk:#0091C7;
+    --bg:#F5F9FC; --card:#FFFFFF; --ink:#12263A; --muted:#5B7185;
+    --line:#DCE7F0; --ok:#0FB27F; --okbg:#E6F7F1; --bad:#E5484D; --badbg:#FDECEC;
+    --warn:#E8A13C; --warnbg:#FCF3E4; --purple:#7C5CFF; --purplebg:#EFEBFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  h1,h2,h3,h4{color:var(--navy);line-height:1.25}
+  a{color:var(--cyan-dk)}
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:10px 22px;overflow-x:auto;white-space:nowrap}
+  nav .brand{font-weight:800;color:var(--navy);margin-right:14px;display:flex;align-items:center;gap:8px}
+  nav .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(0,186,242,.18)}
+  nav a.nl{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:20px;transition:.18s}
+  nav a.nl:hover{background:#EDF6FC;color:var(--navy)}
+  nav a.nl.active{background:var(--navy);color:#fff}
+  section{max-width:1080px;margin:0 auto;padding:60px 24px 8px}
+  .kicker{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan-dk);background:#E4F6FD;padding:5px 12px;border-radius:20px;margin-bottom:12px}
+  .sec-title{font-size:clamp(25px,4vw,34px);font-weight:800;margin-bottom:8px}
+  .lede{color:var(--muted);font-size:16.5px;max-width:780px;margin-bottom:26px}
+  .sub{font-size:19px;font-weight:700;margin:32px 0 12px;color:var(--navy)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(7,32,59,.05)}
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:900px){.g3,.g4{grid-template-columns:1fr}}
+  @media(max-width:640px){.g2{grid-template-columns:1fr}}
+  .note{font-size:12.5px;color:var(--muted);margin-top:12px;font-style:italic}
+  .back-page{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--cyan-dk);text-decoration:none;margin-bottom:6px}
+
+  header.hero{background:linear-gradient(160deg,#3B0A0A 0%,#07203B 45%,#0E3157 100%);color:#fff;padding:66px 24px 80px}
+  .hero-inner{max-width:1080px;margin:0 auto}
+  .hero .tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#FFC9A3;background:rgba(232,161,60,.12);border:1px solid rgba(232,161,60,.4);padding:6px 14px;border-radius:20px;margin-bottom:18px}
+  .hero h1{color:#fff;font-size:clamp(28px,4.6vw,46px);font-weight:800;max-width:860px}
+  .hero h1 em{color:#FFB27A;font-style:normal}
+  .hero p.sub{color:#C9D9E8;font-size:17.5px;max-width:760px;margin:16px 0 8px}
+  .hero .q{background:rgba(255,255,255,.06);border-left:4px solid #FFB27A;border-radius:0 12px 12px 0;padding:14px 18px;margin-top:18px;max-width:760px;font-size:15.5px;color:#FFE3CD}
+  .hero .q b{color:#fff}
+
+  /* TIERS */
+  .tier{border-radius:16px;padding:20px 22px;border:1px solid var(--line);position:relative}
+  .tier h4{display:flex;align-items:center;gap:10px;font-size:16.5px}
+  .tier .who{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .tier ul{list-style:none;margin-top:10px}
+  .tier li{font-size:13.5px;padding:4px 0 4px 20px;position:relative;color:#3A4E62}
+  .tier li::before{position:absolute;left:0;font-weight:800}
+  .tier.auto{background:#F0FBF7;border-color:#BCE8DA}.tier.auto .who{color:var(--ok)}.tier.auto li::before{content:"⚡";color:var(--ok)}
+  .tier.ops{background:#FDF7EC;border-color:#F0DFB8}.tier.ops .who{color:#B47414}.tier.ops li::before{content:"🧑‍💻";font-size:12px}
+  .tier.judge{background:#FDEFF0;border-color:#F2C7CA}.tier.judge .who{color:var(--bad)}.tier.judge li::before{content:"⚖️";font-size:12px}
+  .tier .pct{position:absolute;top:16px;right:18px;font-weight:800;font-size:13px;padding:3px 11px;border-radius:14px}
+  .tier.auto .pct{background:var(--ok);color:#fff}.tier.ops .pct{background:var(--warn);color:#fff}.tier.judge .pct{background:var(--bad);color:#fff}
+  .arrow-down{text-align:center;font-size:22px;color:var(--muted);margin:2px 0}
+
+  /* DUAL TIMELINE */
+  .tl-box{background:var(--navy);border-radius:20px;padding:26px 22px;color:#fff;overflow-x:auto}
+  .tl-lane{margin:34px 0 6px;min-width:640px}
+  .tl-lane .lane-lbl{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:26px}
+  .tl-lane.cust .lane-lbl{color:#FFB27A}.tl-lane.sys .lane-lbl{color:#7FE3C4}
+  .tl-rail{position:relative;height:4px;background:#1D4E80;border-radius:4px;margin:0 6px}
+  .tl-ev{position:absolute;top:-9px;transform:translateX(-50%)}
+  .tl-ev .pin{width:18px;height:18px;border-radius:50%;border:3px solid #0E3157;cursor:default}
+  .tl-lane.cust .tl-ev .pin{background:#FF8A5C}.tl-lane.sys .tl-ev .pin{background:#2BD69E}
+  .tl-ev .tag2{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:150px;text-align:center;font-size:11px;font-weight:700;background:#0E3157;border:1px solid #1D4E80;border-radius:10px;padding:7px 8px;color:#DCEBF7;line-height:1.35}
+  .tl-ev .tag2 .tm{display:block;color:#7FA5C4;font-size:10px;font-weight:800;margin-top:2px}
+  .tl-lane.sys .tl-ev .tag2{bottom:30px}
+  .tl-gap-callout{margin-top:26px;background:rgba(255,178,122,.1);border:1px solid rgba(255,178,122,.35);border-radius:14px;padding:16px 18px;min-width:640px}
+  .tl-gap-callout .h{font-weight:800;color:#FFB27A;font-size:14.5px;display:flex;gap:8px;align-items:center}
+  .tl-gap-callout p{font-size:13.5px;color:#DCEBF7;margin-top:6px}
+
+  /* REALITY TABLE */
+  .tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;min-width:860px}
+  th{background:var(--navy);color:#fff;text-align:left;font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding:11px 14px}
+  td{padding:12px 14px;border-top:1px solid var(--line);font-size:13px;vertical-align:top}
+  td.sc{font-weight:800;color:var(--navy);min-width:140px}
+  td.sc .cd{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;font-weight:800;padding:1px 7px;border-radius:6px;margin-top:4px}
+  .v{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:10px;white-space:nowrap}
+  .v.full{background:var(--okbg);color:var(--ok)} .v.part{background:var(--warnbg);color:#B47414} .v.never{background:var(--badbg);color:var(--bad)}
+  .auto-yes{color:var(--ok);font-weight:700}.auto-no{color:var(--bad);font-weight:700}
+
+  /* METERS */
+  .meter-row{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .meter-row:last-child{border:none}
+  .meter-row .lbl{flex:0 0 300px;font-size:13.5px;font-weight:700;color:var(--ink)}
+  .meter-row .track{flex:1;height:14px;background:#EEF4F9;border-radius:8px;overflow:hidden}
+  .meter-row .fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:800;color:#fff}
+  .fill.f-ok{background:linear-gradient(90deg,#0FB27F,#17C790)} .fill.f-part{background:linear-gradient(90deg,#E8A13C,#F0B458)} .fill.f-no{background:linear-gradient(90deg,#E5484D,#EF6A6E);width:8% !important}
+  @media(max-width:700px){.meter-row{flex-wrap:wrap}.meter-row .lbl{flex:1 1 100%}}
+
+  /* FUNNEL */
+  .funnel-bar{display:flex;height:56px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .fseg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12.5px;font-weight:800;min-width:14px}
+  .f-ok2{background:linear-gradient(90deg,#0FB27F,#17C790)}
+  .f-bd{background:linear-gradient(90deg,#E8A13C,#F0B458)}
+  .f-td{background:linear-gradient(90deg,#E5484D,#EF6A6E)}
+  .flegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+  .fl{font-size:13px;color:#3A4E62;font-weight:600}
+  .fl-ok b{color:var(--ok)} .fl-bd b{color:#B47414} .fl-td b{color:var(--bad)}
+  .bd-chips{margin-top:14px;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .bd-chips span{background:#FDF7EC;border:1px solid #F0DFB8;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#7A5210}
+
+  /* STRATEGIES */
+  .strat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 24px 20px;box-shadow:0 2px 6px rgba(7,32,59,.05)}
+  .strat.s1{border-top:6px solid var(--cyan)} .strat.s2{border-top:6px solid var(--warn)} .strat.s3{border-top:6px solid var(--bad)}
+  .truth-pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 11px;border-radius:12px;margin-bottom:8px}
+  .truth-pill.t1{background:#E4F6FD;color:var(--cyan-dk)} .truth-pill.t2{background:var(--warnbg);color:#B47414} .truth-pill.t3{background:var(--badbg);color:var(--bad)}
+  .strat h3{font-size:20px;margin-bottom:4px}
+  .strat-sub{font-size:14px;color:var(--muted);max-width:820px}
+  .play-steps{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 6px}
+  .ps{background:#F2F7FB;border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--ink)}
+  .arr{color:var(--muted);font-weight:800}
+  .strat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+  @media(max-width:800px){.strat-grid{grid-template-columns:1fr}}
+  .strat-grid .card h4{font-size:14.5px;margin-bottom:6px}
+  .strat-grid .card p{font-size:13px;color:var(--muted)}
+  .schips{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .schip{font-size:12.5px;font-weight:600;border-radius:10px;padding:9px 13px;line-height:1.45}
+  .schip.n8n{background:#FDEDF1;color:#8A2C47;border:1px solid #F5C6D2}
+  .schip.cognee{background:#EFEBFF;color:#4B31B8;border:1px solid #D8CFFF}
+  .schip.sarvam{background:#FEF2E8;color:#9A5A16;border:1px solid #F7D9BC}
+  .schip b{font-weight:800}
+  .kpi{margin-top:14px;background:var(--navy);color:#fff;border-radius:12px;padding:12px 16px;font-size:13.5px;font-weight:600}
+  .kpi b{color:#7FE3FF}
+  .sponsor-card{position:relative;padding-top:26px}
+  .sp-badge{position:absolute;top:-12px;left:18px;font-size:12px;font-weight:800;padding:3px 13px;border-radius:12px;color:#fff}
+  .sp-badge.n8n-b{background:#EA4B71} .sp-badge.cognee-b{background:#7C5CFF} .sp-badge.sarvam-b{background:#F2994A}
+
+  /* ENGINE ROOM */
+  .decision-banner{background:linear-gradient(140deg,#3B0A0A,#07203B 70%);border-radius:16px;color:#fff;padding:20px 24px;margin-bottom:26px}
+  .decision-banner .dt{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FFB27A;margin-bottom:6px}
+  .decision-banner p{font-size:14.5px;color:#DCEBF7}
+  .decision-banner b{color:#fff}
+  .engine{border-radius:18px;border:1px solid var(--line);background:#fff;padding:24px;box-shadow:0 2px 6px rgba(7,32,59,.05)}
+  .engine .eng-head{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .engine .eng-head h3{font-size:20px}
+  .price-tbl{width:100%;border-collapse:collapse;margin-top:10px}
+  .price-tbl td{padding:7px 10px;border-top:1px solid var(--line);font-size:12.5px}
+  .price-tbl td:last-child{text-align:right;font-weight:800;color:var(--navy);white-space:nowrap}
+  .price-tbl .free-row td{color:var(--ok)}
+  .codeblock{background:#0B1F35;border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto}
+  .codeblock .cb-tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7FE3FF;margin-bottom:8px}
+  .codeblock pre{font-family:ui-monospace,Consolas,"Cascadia Code",monospace;font-size:12.5px;line-height:1.6;color:#D9E8F5;white-space:pre}
+  .codeblock .c{color:#6E8CA6}.codeblock .s{color:#8FE3A8}.codeblock .k{color:#FFB27A}
+  .cost-card{background:linear-gradient(150deg,#F0FBF7,#E6F7F1);border:1.5px solid #BCE8DA;border-radius:16px;padding:20px}
+  .cost-card h4{display:flex;gap:8px;align-items:center}
+  .cost-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #BCE8DA;font-size:13.5px}
+  .cost-row:last-child{border:none}
+  .cost-row b{color:var(--ok);white-space:nowrap}
+
+  /* VERDICT / FORMULA */
+  .formula{background:linear-gradient(150deg,var(--navy),#11406e);border-radius:20px;color:#fff;padding:30px 28px}
+  .formula h3{color:#fff;font-size:22px;margin-bottom:14px}
+  .formula .line{font-size:17px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.18);display:flex;gap:12px;align-items:baseline}
+  .formula .line:last-child{border:none}
+  .formula .line .ic{font-size:20px}
+  .formula .line b{color:#7FE3FF}
+  .never-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+  @media(max-width:700px){.never-list{grid-template-columns:1fr}}
+  .never-list .ni{background:rgba(229,72,77,.1);border:1px solid rgba(229,72,77,.35);border-radius:12px;padding:12px 14px;font-size:13px;color:#FFD9DA;display:flex;gap:10px}
+  .never-list .ni b{color:#fff}
+
+  .judge-card{background:#fff;border:2px solid var(--cyan);border-radius:18px;padding:24px;position:relative}
+  .judge-card .jc-tag{position:absolute;top:-13px;left:20px;background:var(--cyan);color:var(--navy);font-size:11.5px;font-weight:800;letter-spacing:.06em;padding:4px 12px;border-radius:12px;text-transform:uppercase}
+  .judge-card blockquote{font-size:16.5px;color:var(--ink);line-height:1.7;font-style:italic}
+  .judge-card blockquote b{color:var(--navy);font-style:normal}
+
+  footer{margin-top:70px;background:var(--navy);color:#8FB3D1;padding:30px 24px;text-align:center;font-size:13px}
+  footer b{color:#fff}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <span class="brand"><span class="dot"></span>UPI 101 · <a href="index.html" style="color:var(--navy);text-decoration:none">for Sahayak</a></span>
+  <a class="nl" href="index.html#cast">The Players</a>
+  <a class="nl" href="index.html#journey">The Journey</a>
+  <a class="nl" href="index.html#codes">Error Codes</a>
+  <a class="nl" href="index.html#scenes">4 Failure Scenes</a>
+  <a class="nl active" href="reality.html">Reality Check</a>
+  <a class="nl" href="index.html#playbook">Backtracking</a>
+  <a class="nl" href="index.html#sahayak">Sahayak's Eyes</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="tag">🎯 The question that decides the pitch</span>
+    <h1>"If UPI returns the money by itself… <em>why do thousands of support humans exist?</em>"</h1>
+    <p class="sub">This page answers it honestly — scenario by scenario. What the rails fix automatically (spoiler: a lot), where today's humans actually sit, which cases nobody has automated, and exactly which slice Sahayak replaces — and which slice it must <b style="color:#fff">never</b> touch.</p>
+    <div class="q">💬 <b>You will get this question from a judge.</b> "Debited-not-credited auto-reverses in a few hours anyway, right? So what does your agent do?" If the answer is mush, the project dies. If the answer is this page — it wins.</div>
+  </div>
+</header>
+
+<!-- ============ 1. THE THREE TIERS ============ -->
+<section id="tiers">
+  <span class="kicker">01 · Who fixes what today</span>
+  <h2 class="sec-title">Three tiers already exist — only one of them is human</h2>
+  <p class="lede">Before asking "can an agent do this?", know who does it today. Money-return mechanics are already automated at the bottom. Humans live in the middle and top — in different jobs than you'd guess.</p>
+
+  <div class="tier auto">
+    <span class="pct">~80–85% of stuck cases</span>
+    <div class="who">Tier 1 · The Rails — NPCI + bank core systems</div>
+    <h4>⚡ Fully automatic, no human ever touches it</h4>
+    <ul>
+      <li><b>Auto-reversal on explicit failure:</b> debit done + credit failed (Z5/Z8) → reversal fires by itself, usually lands in minutes–hours, guideline deadline T+1 (worst case ~3 days)</li>
+      <li><b>Pending auto-expiry:</b> a hanging txn (T1/Z6) is deemed failed & released automatically, typically 30 min–24 h</li>
+      <li><b>Orphan-debit cleanup:</b> most duplicate debits self-reverse the same way</li>
+      <li><b>Settlement reconciliation:</b> end-of-day matching between banks, machine-to-machine</li>
+    </ul>
+  </div>
+  <div class="arrow-down">▼ when the rails' answer isn't enough, it lands on… ▼</div>
+
+  <div class="tier ops">
+    <span class="pct">the ticket factory</span>
+    <div class="who">Tier 2 · The Ops Floor — Paytm 24×7 chat/call + bank ops teams</div>
+    <h4>🧑‍💻 Humans… mostly reading a screen out loud</h4>
+    <ul>
+      <li><b>Reassurance tickets:</b> "your money is safe, reversal initiated, expect it by 14:02 tomorrow" — said a few thousand times a day, info already visible on their dashboard</li>
+      <li><b>Complaint filing:</b> past-SLA cases → human raises the ticket with RRN into the bank/NPCI portal and tracks it</li>
+      <li><b>SLA chasing:</b> ops dashboards + manual follow-ups when a reversal stalls or a complaint sits</li>
+      <li><b>Translation &amp; channel handling:</b> saying the same thing in Hindi/Telugu/English across chat, call, WhatsApp</li>
+    </ul>
+    <p class="note">This is the volume layer — the bulk of headcount and cost (₹80–150 per ticket), and it's exactly the layer that's <b>information work, not judgment work</b>.</p>
+  </div>
+  <div class="arrow-down">▼ and the cases machines can't decide land on… ▼</div>
+
+  <div class="tier judge">
+    <span class="pct">~15%, all the pain</span>
+    <div class="who">Tier 3 · The Judgment Desk — risk, disputes, legal</div>
+    <h4>⚖️ Humans deciding, not just informing</h4>
+    <ul>
+      <li><b>Wrong-account transfers:</b> a *successful* payment to the wrong VPA — no rail reverses it; needs beneficiary-bank consent or legal muscle</li>
+      <li><b>Fraud response:</b> scam detected → freezing via the cybercrime helpline (1930) / portal, banks coordinating manually — speed decides if money is catchable</li>
+      <li><b>Merchant disputes:</b> paid but goods never came → chargeback-style arbitration</li>
+      <li><b>Executive escalations:</b> ombudsman defense, viral complaints, VIP cases</li>
+    </ul>
+    <p class="note">The rails solve <b>none</b> of these automatically. This layer is humans because someone must hold <b>authority</b>, not just information.</p>
+  </div>
+</section>
+
+<!-- ============ 2. THE WAITING PROBLEM ============ -->
+<section id="waiting">
+  <span class="kicker">02 · The Anxiety Gap</span>
+  <h2 class="sec-title">The money heals itself. The customer doesn't.</h2>
+  <p class="lede">The most common stuck-payment ticket involves <b>zero action required</b> — the reversal is already flying. The human agent's entire job is narrating a screen. Watch the two clocks run at different speeds:</p>
+
+  <div class="tl-box">
+    <div class="tl-lane sys">
+      <div class="lane-lbl">⚙️ What the system did (by itself)</div>
+      <div class="tl-rail">
+        <div class="tl-ev" style="left:3%"><div class="pin"></div><div class="tag2">Failure ack recorded<span class="tm">min 0.5</span></div></div>
+        <div class="tl-ev" style="left:9%"><div class="pin"></div><div class="tag2">Auto-reversal triggered<span class="tm">min 2</span></div></div>
+        <div class="tl-ev" style="left:26%"><div class="pin"></div><div class="tag2">₹ credited back — silently<span class="tm">hour 6</span></div></div>
+      </div>
+    </div>
+    <div class="tl-lane cust">
+      <div class="lane-lbl">😰 What the customer lived (same 48 hours)</div>
+      <div class="tl-rail">
+        <div class="tl-ev" style="left:2%"><div class="pin"></div><div class="tag2">Re-checks app ×5, money gone<span class="tm">min 5</span></div></div>
+        <div class="tl-ev" style="left:14%"><div class="pin"></div><div class="tag2">Googles "UPI debited not credited"<span class="tm">hour 2</span></div></div>
+        <div class="tl-ev" style="left:24%"><div class="pin"></div><div class="tag2">Calls support · 14-min queue<span class="tm">hour 3</span></div></div>
+        <div class="tl-ev" style="left:33%"><div class="pin"></div><div class="tag2">Told: "wait 24–48h" — no RRN, no ETA<span class="tm">hour 3</span></div></div>
+        <div class="tl-ev" style="left:58%"><div class="pin"></div><div class="tag2">Obsessive bank-app checking<span class="tm">hour 24</span></div></div>
+        <div class="tl-ev" style="left:72%"><div class="pin"></div><div class="tag2">Angry tweet @Paytmcare<span class="tm">hour 30</span></div></div>
+        <div class="tl-ev" style="left:90%"><div class="pin"></div><div class="tag2">Money's back. Trust isn't.<span class="tm">hour 48</span></div></div>
+      </div>
+    </div>
+    <div class="tl-gap-callout">
+      <div class="h">🕳️ The gap = the entire Tier-2 support industry</div>
+      <p>The money was never lost — it was <b>in flight for 6 hours with nobody talking</b>. Every dot on the red lane that reached a human produced a ticket that cost ₹80–150 to answer with a sentence a machine already knew. <b>Sahayak's #1 job isn't moving money — it's closing this gap in second 1, in the customer's language, with the real ETA and the RRN.</b></p>
+    </div>
+  </div>
+  <p class="note">Scroll sideways on the timeline on mobile ↔ · Times are a composite of typical behaviour, directional not audited.</p>
+</section>
+
+<!-- ============ 3. SCENARIO TABLE ============ -->
+<section id="matrix">
+  <span class="kicker">03 · The Honest Matrix</span>
+  <h2 class="sec-title">Scenario by scenario: what's automatic, where's the human, what does Sahayak take</h2>
+  <p class="lede">The reference table for the whole project. Green verdict = agent replaces the human fully. Amber = agent does the legwork, human keeps the decision. Red = hands off by design.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Do the rails auto-fix it?</th><th>Where the human is today</th><th>Sahayak's verdict</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="sc">Clean decline<span class="cd" style="background:#EFEBFF;color:var(--purple)">Z2 · U30</span></td>
+          <td><span class="auto-yes">Yes — nothing to fix.</span> Money never left. Rails did everything already.</td>
+          <td>Explains <i>why</i> it failed (limit? risk rule? wrong PIN?) and what to change</td>
+          <td><span class="v full">✅ FULL</span><br>Read the code, explain in Hindi/English, suggest the fix. Zero judgment needed.</td>
+        </tr>
+        <tr>
+          <td class="sc">Debited, not credited<span class="cd" style="background:#FDECEC;color:var(--bad)">Z5 · Z8</span></td>
+          <td><span class="auto-yes">Yes — reversal fires itself</span> (minutes–hours, deadline T+1). <b>The agent does NOT "get the money back."</b></td>
+          <td>Reassurance tickets during the wait; manual check if it stalls past deadline</td>
+          <td><span class="v full">✅ FULL</span><br>Verify reversal in-flight, proactively narrate with real ETA + RRN, and <b>catch the stall</b> the rails won't self-heal.</td>
+        </tr>
+        <tr>
+          <td class="sc">Pending limbo past SLA<span class="cd" style="background:#FCF3E4;color:#B47414">T1 · Z6 · U50</span></td>
+          <td><span class="auto-no">Partially.</span> Auto-expiry tries once — <b>if it's still stuck after that, nothing self-heals.</b> Ever.</td>
+          <td>Human files the complaint with RRN into the bank/NPCI portal, then manually chases on T+1/T+3</td>
+          <td><span class="v full">✅ FULL</span><br>File it itself, arm the timers, chase without forgetting, update the customer at every hop. This is the strongest replace-case.</td>
+        </tr>
+        <tr>
+          <td class="sc">Duplicate / partial debit<span class="cd" style="background:#EFEBFF;color:var(--purple)">retry pair</span></td>
+          <td><span class="auto-yes">Usually</span> — the orphan debit self-reverses like any failed credit</td>
+          <td>Human eyeballs the pair, files a ticket for the one that didn't return</td>
+          <td><span class="v full">✅ FULL</span><br>Detect the pair instantly, verify the orphan's status, file + track if the auto-reversal missed it.</td>
+        </tr>
+        <tr>
+          <td class="sc">Wrong account<span class="cd" style="background:#FDECEC;color:var(--bad)">SUCCESS + wrong VPA</span></td>
+          <td><span class="auto-no">No. Non-negotiable: no rail reverses a completed payment.</span> Needs beneficiary-bank consent or legal action — that's by design, to protect the correct recipient.</td>
+          <td>Heavy: complaint → remitter bank ↔ beneficiary bank consent dance → often dead-end → police/court if fraud-sized</td>
+          <td><span class="v part">⚠️ PARTIAL</span><br>Agent's slice: instant filing, complete evidence pack (first-time flag, amount anomaly), status comms, prep for the human. <b>The reversal decision stays human.</b></td>
+        </tr>
+        <tr>
+          <td class="sc">Fraud / scam<span class="cd" style="background:#FDECEC;color:var(--bad)">scam-shaped txns</span></td>
+          <td><span class="auto-no">No auto-freeze.</span> Freezing happens via the 1930 cybercrime helpline / portal — and speed decides whether funds are catchable before they hop accounts</td>
+          <td>Risk teams + victim's own alertness; banks coordinate manually, slowly</td>
+          <td><span class="v part">⚠️ PARTIAL</span><br>Detect the signature in <b>seconds</b> (first-time VPA + 9.5× amount + fraud reports), alert with the full case file, guide the freeze steps. <b>Authority to freeze: human.</b></td>
+        </tr>
+        <tr>
+          <td class="sc">Merchant dispute<span class="cd" style="background:#FCF3E4;color:#B47414">P2M · goods never came</span></td>
+          <td><span class="auto-no">No.</span> Payment was correct; the contract wasn't. Outside payment-rail jurisdiction</td>
+          <td>Chargeback-style arbitration between Paytm/merchant/bank</td>
+          <td><span class="v part">⚠️ PARTIAL</span><br>Package the timeline (txn proof, merchant contact attempts), file, track. <b>Judgment of who's right: human.</b></td>
+        </tr>
+        <tr>
+          <td class="sc">Beneficiary account blocked / frozen<span class="cd" style="background:#FCF3E4;color:#B47414">credit refused</span></td>
+          <td><span class="auto-no">Sometimes manual.</span> Frozen/KYC-limited accounts can refuse credit; reversal can need a nudge</td>
+          <td>Bank ops investigates why the account rejected, triggers manual return</td>
+          <td><span class="v part">⚠️ PARTIAL</span><br>Detect fast, classify, escalate with context to the right bank queue. <b>Unfreezing: bank humans.</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Read the pattern: every ✅ row is <b>information + paperwork + follow-through</b>. Every ⚠️ row is that same legwork wrapped around a decision that belongs to a human. There is no ❌-only row — even the hardest case benefits from instant evidence assembly.</p>
+</section>
+
+<!-- ============ 4. METERS ============ -->
+<section id="meters">
+  <span class="kicker">04 · Automatability Meters</span>
+  <h2 class="sec-title">How much of each human task can Sahayak take?</h2>
+  <p class="lede">Task-level view — this is the slide to answer "so are you replacing humans?" precisely. Green bar = automatable now with the tools we're building. Amber = most of it, edge needs the human. Red = deliberately never.</p>
+  <div class="card">
+    <div class="meter-row"><div class="lbl">💬 Reassurance: explain status + real ETA</div><div class="track"><div class="fill f-ok" style="width:100%">100%</div></div></div>
+    <div class="meter-row"><div class="lbl">📣 Proactive updates in customer's language</div><div class="track"><div class="fill f-ok" style="width:100%">100%</div></div></div>
+    <div class="meter-row"><div class="lbl">🧾 Complaint filing with RRN + evidence</div><div class="track"><div class="fill f-ok" style="width:92%">92%</div></div></div>
+    <div class="meter-row"><div class="lbl">⏱️ SLA timers: chase at T+1 / T+3, never forget</div><div class="track"><div class="fill f-ok" style="width:95%">95%</div></div></div>
+    <div class="meter-row"><div class="lbl">🕳️ Stalled-reversal detection (rails won't self-heal)</div><div class="track"><div class="fill f-ok" style="width:90%">90%</div></div></div>
+    <div class="meter-row"><div class="lbl">🚩 Wrong-VPA / fraud evidence assembly</div><div class="track"><div class="fill f-part" style="width:85%">85%</div></div></div>
+    <div class="meter-row"><div class="lbl">🕵️ Anomaly detection (first-time + amount + reputation)</div><div class="track"><div class="fill f-part" style="width:75%">75%</div></div></div>
+    <div class="meter-row"><div class="lbl">⚖️ Deciding guilt / who's right in disputes</div><div class="track"><div class="fill f-no">0%</div></div></div>
+    <div class="meter-row"><div class="lbl">🔒 Authorizing reversal of a successful payment</div><div class="track"><div class="fill f-no">0%</div></div></div>
+    <div class="meter-row"><div class="lbl">🧊 Ordering account freezes</div><div class="track"><div class="fill f-no">0%</div></div></div>
+  </div>
+  <p class="note">The three 0% rows aren't limitations — they're the <b>product design</b>. "Agent freedom where it helps, hard rails where money and authority are involved." A support bot that could reverse successful payments would be a security incident, not a feature.</p>
+</section>
+
+<!-- ============ 5. NUMBERS ============ -->
+<section id="numbers">
+  <span class="kicker">05 · The Numbers</span>
+  <h2 class="sec-title">How big is this, really? The failure math</h2>
+  <p class="lede">Published stats first, then a clearly-labeled model for what nobody publishes. The punchline you'll use on stage: <b>technical failures are rare per-transaction… and enormous in absolute volume.</b></p>
+
+  <div class="grid g4">
+    <div class="card" style="text-align:center"><div style="font-size:26px;font-weight:800;color:var(--navy)">24.51 <span style="font-size:14px">Billion</span></div><div style="font-size:12.5px;color:var(--muted);font-weight:600">UPI txns · Aug 2026 (record month)</div></div>
+    <div class="card" style="text-align:center"><div style="font-size:26px;font-weight:800;color:var(--navy)">₹29.8 <span style="font-size:14px">lakh crore</span></div><div style="font-size:12.5px;color:var(--muted);font-weight:600">value moved in that one month</div></div>
+    <div class="card" style="text-align:center"><div style="font-size:26px;font-weight:800;color:var(--navy)">55.5 <span style="font-size:14px">crore</span></div><div style="font-size:12.5px;color:var(--muted);font-weight:600">UPI users (June 2026)</div></div>
+    <div class="card" style="text-align:center"><div style="font-size:26px;font-weight:800;color:var(--navy)">241 <span style="font-size:14px">Billion</span></div><div style="font-size:12.5px;color:var(--muted);font-weight:600">txns in full FY 2025-26 · ₹314 lakh cr</div></div>
+  </div>
+
+  <div class="sub">📉 Failure taxonomy — what happens to 10,000 payment attempts</div>
+  <p class="lede" style="font-size:14.5px;margin-bottom:16px">NPCI splits failures into <b>Business Declines (BD)</b> — the user's fault: low balance, wrong PIN, limit, bad VPA — and <b>Technical Declines (TD)</b> — the system's fault. Attempt-level success runs ~85–95%. So of 10,000 attempts:</p>
+
+  <div class="card">
+    <div class="funnel-bar">
+      <div class="fseg f-ok2" style="width:90%"><span>✓ ~9,000 succeed</span></div>
+      <div class="fseg f-bd" style="width:8.5%"><span title="Business declines"></span></div>
+      <div class="fseg f-td" style="width:1.5%"><span></span></div>
+    </div>
+    <div class="flegend">
+      <div class="fl fl-ok">✅ <b>~9,000</b> succeed (90%)</div>
+      <div class="fl fl-bd">🟠 <b>~950</b> business declines (8–12% of attempts) — money never left</div>
+      <div class="fl fl-td">🔴 <b>~30–80</b> technical declines (0.3–0.8%) — the system's failures</div>
+    </div>
+    <div class="bd-chips">Inside business declines (no official % split — order per industry analyses): <span>💸 insufficient funds — the largest single reason</span><span>🔑 wrong UPI PIN</span><span>📊 daily/monthly limit</span><span>🪪 invalid VPA / account</span></div>
+  </div>
+
+  <div class="sub">🔴 Zoom: inside those ~50 technical declines — our 4 scenes</div>
+  <p class="lede" style="font-size:14.5px;margin-bottom:16px">⚠️ <b>Nobody publishes this split</b> — not NPCI, not banks. What follows is <b>our directional model</b> built from the code families (clean upfront declines leave no debit; timeout/reversal codes are the rarer, uglier paths) — treat as design estimates, not data.</p>
+  <div class="card">
+    <div class="meter-row"><div class="lbl">✅ Clean technical decline (Z2-style, declined upfront, no debit, retry works)</div><div class="track"><div class="fill f-ok" style="width:72%">~72%</div></div></div>
+    <div class="meter-row"><div class="lbl">⏳ Pending limbo past SLA (T1·Z6·U50) — <b>nothing self-heals → Scene 2</b></div><div class="track"><div class="fill f-part" style="width:17%">~17%</div></div></div>
+    <div class="meter-row"><div class="lbl">🔁 Debit done, credit failed (Z5·Z8) — reversal flying → <b>Scene 1</b></div><div class="track"><div class="fill f-part" style="width:8%">~8%</div></div></div>
+    <div class="meter-row"><div class="lbl">👯 Duplicate / orphan debit → <b>Scene 3</b></div><div class="track"><div class="fill f-part" style="width:3%">~3%</div></div></div>
+  </div>
+
+  <div class="card" style="margin-top:18px;border-left:5px solid var(--cyan)">
+    <h4>🧮 The scale math that lands with judges (directional)</h4>
+    <p style="font-size:14px;color:#3A4E62">At <b>24.5 B transactions/month</b>, even a 0.3–0.8% technical decline rate = <b>~75–195 million technically-failed payments every month</b>. Of those, our model says ~25–35% involve actual debited money (pending + reversal + duplicate) = <b>~20–65 million stuck-money situations monthly</b>. If even 5% of those need a human today: <b>1–3.5 million support tickets/month</b> at ₹80–150 each ≈ <b>₹10–50 crore/month of support cost</b> — before counting the trust damage and the Twitter complaints. <i>Rare per-transaction. Enormous per-month.</i></p>
+  </div>
+
+  <div class="sub">🏦 Same UPI, wildly different failure rates — the bank lottery</div>
+  <p class="lede" style="font-size:14.5px;margin-bottom:16px">Published per-bank TD rates (FY25 reporting) — your payment's fate depends on which bank hosts your VPA. The spread is ~90×</p>
+  <div class="card">
+    <div class="meter-row"><div class="lbl">🏦 HDFC Bank</div><div class="track"><div class="fill f-ok" style="width:2%">0.08%</div></div></div>
+    <div class="meter-row"><div class="lbl">⚙️ System-wide average (2026)</div><div class="track"><div class="fill f-ok" style="width:8%">~0.3–0.5%</div></div></div>
+    <div class="meter-row"><div class="lbl">🏦 Bandhan Bank</div><div class="track"><div class="fill f-part" style="width:34%">2.48%</div></div></div>
+    <div class="meter-row"><div class="lbl">🏦 Jio Payments Bank</div><div class="track"><div class="fill f-no" style="width:99%">7.23%</div></div></div>
+    <div class="meter-row"><div class="lbl">🏦 Airtel Payments Bank</div><div class="track"><div class="fill f-no" style="width:100%">7.26%</div></div></div>
+    <p class="note">Small-finance &amp; regional banks: 3–5% at peak hours. NPCI's operational target: TD &lt; 1% per bank; RBI's threshold likewise 1% — several banks run above it. The agent doesn't just fight failures; it fights <b>your bank's specific failure rate</b>.</p>
+  </div>
+
+  <div class="sub">👻 The invisible category — Scene 4 exists in no failure statistic</div>
+  <div class="card" style="border-left:5px solid var(--bad)">
+    <p style="font-size:14px;color:#3A4E62"><b>Wrong-account transfers and UPI fraud never appear in TD/BD numbers — because the payment technically SUCCEEDED.</b> They surface only in complaints and crime data: RBI Ombudsman logged <b>13.34 lakh total complaints in FY25 (+13.6%)</b>, with mobile/electronic banking at <b>16.86%</b> (and note: back in FY22, digital payments were the #1 category at 42% — the volume migrated to in-app support, which is exactly where Sahayak sits). Every "successful" ₹19,000 sent to a scammer is a zero in the failure dashboard. <b>The worst day in payments is invisible in payments statistics</b> — that's why the agent needs relationship signals, not just error codes.</p>
+  </div>
+
+  <p class="note" style="max-width:860px">📚 Sources: NPCI UPI product statistics &amp; NIPL dashboard (volumes, TD/BD definitions) · PIB Jun 2026 (FY26: 24,162 cr txns, ₹314 lakh cr, 55.49 cr users) · The Hindu / Business Standard (Aug 2026 record: 24.51B, ₹29.8 lakh cr) · Moneycontrol &amp; industry analyses of NPCI bank-wise BD/TD data (FY25 per-bank rates) · RBI Ombudsman Annual Reports FY25 &amp; FY21-22 · D91 Labs / ProductGrowth success-rate analyses (TD trend 2016→2026). Scene split &amp; cost math = our directional model, labeled as such.</p>
+</section>
+
+<!-- ============ 6. FORMULA ============ -->
+<section id="formula">
+  <span class="kicker">06 · The Positioning</span>
+  <h2 class="sec-title">Sahayak's honest one-liner</h2>
+  <div class="formula">
+    <h3>🧮 The division of labour</h3>
+    <div class="line"><span class="ic">⚙️</span><span><b>The rails</b> return the money. (Already automatic — we don't pretend to beat NPCI at NPCI's job.)</span></div>
+    <div class="line"><span class="ic">🤖</span><span><b>Sahayak</b> returns the customer — information, paperwork, follow-through: the entire Tier-2 floor, 24×7, in the customer's language, with receipts.</span></div>
+    <div class="line"><span class="ic">🧑‍⚖️</span><span><b>Humans</b> keep the judgment calls — but meet them halfway: one alert, complete case file, zero re-explaining.</span></div>
+    <div class="never-list">
+      <div class="ni">🛑 <span><b>Never:</b> reverse a successful payment on its own authority</span></div>
+      <div class="ni">🛑 <span><b>Never:</b> order a freeze or decide fraud guilt</span></div>
+      <div class="ni">🛑 <span><b>Never:</b> override a bank risk block or limit</span></div>
+      <div class="ni">🛑 <span><b>Never:</b> act silently — every action is narrated to the customer</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. STRATEGIES ============ -->
+<section id="strategies">
+  <span class="kicker">07 · The Strategies</span>
+  <h2 class="sec-title">Three truths. Three battle plans.</h2>
+  <p class="lede">The 30-second answer names the problems; this is how Sahayak kills each one. Every strategy follows the same anatomy: <b>trigger → agent moves → sponsor engines → demo moment → the number that proves it</b>.</p>
+
+  <!-- STRATEGY 1 -->
+  <div class="strat s1">
+    <div class="strat-head">
+      <div>
+        <span class="truth-pill t1">kills Truth 1 · nobody tells the customer</span>
+        <h3>📣 Strategy 1 — "Say It First"</h3>
+        <p class="strat-sub">The Proactive Narration Engine. Win the race against the customer's panic: the first message about a stuck payment should come from us — within 60 seconds — not from a support queue after 3 hours of fear.</p>
+      </div>
+    </div>
+    <div class="play-steps">
+      <span class="ps">⚡ payment event webhook fires</span><span class="arr">→</span>
+      <span class="ps">🧠 classify failure state + real ETA (from case memory)</span><span class="arr">→</span>
+      <span class="ps">🌐 compose in customer's language</span><span class="arr">→</span>
+      <span class="ps">📲 WhatsApp / SMS / voice note</span><span class="arr">→</span>
+      <span class="ps">🔁 update at every state change</span><span class="arr">→</span>
+      <span class="ps">✅ close with confirmation receipt</span>
+    </div>
+    <div class="strat-grid">
+      <div class="card"><h4>🧩 How it works</h4><p>Today the info exists on a dashboard but a human must be asked to read it aloud. We invert the flow: the <b>event</b> pushes the story out. ETA isn't generic — case memory knows this bank + this code historically resolves in ~26h, so we say that. Guardrail: one thread per case, max 4 messages, unsubscribe word honored — proactive ≠ spammy.</p></div>
+      <div class="card"><h4>🎬 Demo moment (Scene 1)</h4><p>Payment fails live → within seconds the phone on stage buzzes with a Hindi voice note: <i>"दिनेश जी, आपके ₹2,800 वापस आ रहे हैं, कल 14:02 तक — रसीद नंबर 4102…155।"</i> The customer never opens support. That's the ticket that was never born.</p></div>
+    </div>
+    <div class="schips">
+      <span class="schip n8n">n8n — webhook listener on payment events; the comms workflow; delivery retries; the execution log = proof it ran</span>
+      <span class="schip sarvam">Sarvam — Hindi/regional voice notes (bulbul TTS) + STT for voice replies; understanding of the reply itself is handled by Gemini</span>
+      <span class="schip cognee">Cognee — case memory: per-bank, per-code historical resolution times → the real ETA in the first message</span>
+    </div>
+    <div class="kpi">🎯 Target: time-to-first-information <b>hours → &lt;60 seconds</b> · reassurance tickets <b>deflected ~entirely</b> (the ₹80–150 × thousands/day layer)</div>
+  </div>
+
+  <!-- STRATEGY 2 -->
+  <div class="strat s2" style="margin-top:26px">
+    <div class="strat-head">
+      <div>
+        <span class="truth-pill t2">kills Truth 2 · stalled reversals never self-heal</span>
+        <h3>⏱️ Strategy 2 — "The Machine That Never Forgets"</h3>
+        <p class="strat-sub">Stall-hunter + auto-filer. The rails give up silently; humans forget. Software forgets nothing. Every case gets a timer armed at birth, and the T+1 tick either confirms money landed — or fires the whole filing-and-chasing sequence by itself.</p>
+      </div>
+    </div>
+    <div class="play-steps">
+      <span class="ps">⏰ T+1 timer fires (case open since yesterday)</span><span class="arr">→</span>
+      <span class="ps">🔎 re-verify: did reversal land?</span><span class="arr">→</span>
+      <span class="ps">🧾 no? → classify the stall → file complaint with RRN itself</span><span class="arr">→</span>
+      <span class="ps">🔁 arm T+3 chase → escalate ladder</span><span class="arr">→</span>
+      <span class="ps">📣 narrate every step to customer</span>
+    </div>
+    <div class="strat-grid">
+      <div class="card"><h4>🧩 How it works</h4><p>A deterministic <b>state machine per case</b>: open → verified → filed → chased → escalated → closed. No state can be skipped and no case can be dropped — that's the whole point. Filing is idempotent (one complaint per RRN, ever). The 30-day rung (ombudsman) is tracked too, so the ladder unlocks on schedule, not on anger.</p></div>
+      <div class="card"><h4>🎬 Demo moment (Scene 2)</h4><p>31-hour-pending payment on the dashboard. Agent already filed CMP-338821 (judges watch the filing happen in the thinking timeline), T+1 chase is armed, and a live timer ticks toward the next bank ping. The ops-human this replaces isn't in the room — that's the point.</p></div>
+    </div>
+    <div class="schips">
+      <span class="schip n8n">n8n — the backbone: scheduled SLA timers, retry-with-backoff on bank queries, complaint-desk API calls, escalation fan-out. Its execution log IS the audit trail — show it live to judges</span>
+      <span class="schip cognee">Cognee — learns per-bank stall behaviour ("this bank's Z5 stalls resolve on the 2nd nudge at T+2"), so chase timing adapts instead of blasting on a fixed schedule</span>
+      <span class="schip sarvam">Sarvam — every state change becomes a customer update in their language; voice for low-literacy users</span>
+    </div>
+    <div class="kpi">🎯 Target: zombie complaints <b>5–7 days → &lt;24h median</b> · forgotten cases <b>→ zero by construction</b></div>
+  </div>
+
+  <!-- STRATEGY 3 -->
+  <div class="strat s3" style="margin-top:26px">
+    <div class="strat-head">
+      <div>
+        <span class="truth-pill t3">kills Truth 3 · wrong account & fraud have no auto path</span>
+        <h3>🚨 Strategy 3 — "Minutes, Not Days"</h3>
+        <p class="strat-sub">The evidence flashlight. We can't (and won't) reverse a successful payment — but recoverability is a race against money hopping between mule accounts. What wins the race: detect in seconds, assemble the complete dossier instantly, hand humans and the victim a ready-to-fire action kit.</p>
+      </div>
+    </div>
+    <div class="play-steps">
+      <span class="ps">🚩 signature detected (first-time VPA + amount ≫ usual + reputation flags)</span><span class="arr">→</span>
+      <span class="ps">🧠 hold: no auto-action — assemble full case file</span><span class="arr">→</span>
+      <span class="ps">📤 one alert to the risk desk + victim guidance kit (1930 / cybercrime portal, step-by-step)</span><span class="arr">→</span>
+      <span class="ps">🎙️ Sarvam voice walks the panicked customer through freezing steps live</span><span class="arr">→</span>
+      <span class="ps">⚖️ human decides — dossier already complete</span>
+    </div>
+    <div class="strat-grid">
+      <div class="card"><h4>🧩 How it works</h4><p>Speed × completeness. Today the victim's own alertness is the detection system and the evidence gathering starts days later, scattered across calls. Sahayak detects at payment time from signals already in hand, builds the dossier (timeline, RRN, VPA reputation, amount anomaly, device) in ~40 seconds, and — critically — <b>calms and directs the victim in real time</b>, because a panicked victim who acts in minute 2 freezes money; one who acts on day 3 doesn't.</p></div>
+      <div class="card"><h4>🎬 Demo moment (Scene 4)</h4><p>₹19,000 to a first-time, fraud-flagged VPA. The agent visibly <b>refuses</b> to auto-act — instead: dossier assembled, risk-desk alerted with one complete case file, and a steady Hindi voice note guiding the customer through the 1930 freeze steps. The restraint is the intelligence.</p></div>
+    </div>
+    <div class="schips">
+      <span class="schip cognee">Cognee — the fraud-pattern memory: VPAs linked to prior cases, mule-account clustering, recurring scam signatures — detection sharpens with every case (the LEARN loop)</span>
+      <span class="schip n8n">n8n — parallel fan-out: risk-desk alert + customer comms + case record fire simultaneously, not sequentially; every escalation path is a visible workflow</span>
+      <span class="schip sarvam">Sarvam — the emotional-heavy-lifter: a calm scripted voice guiding a scared victim beat-by-beat through the freeze process in their language</span>
+    </div>
+    <div class="kpi">🎯 Target: time-to-human-with-complete-evidence <b>days → minutes</b> · evidence completeness <b>100%</b> · freeze-success window actually winnable</div>
+  </div>
+
+  <div class="sub">🗺️ The Sponsor Map — where each engine lives in the machine</div>
+  <div class="grid g3">
+    <div class="card sponsor-card"><div class="sp-badge n8n-b" style="background:#9AA7B4">n8n · optional</div><h4>✋ The Hands — now ours</h4><p style="font-size:13.5px"><b>Demoted from the core (Oct 1):</b> hosting a separate workflow platform to drive our own agent loop is theater. SLA timers, retries, filing calls, and fan-out became ~200 lines of in-app Python with a state machine whose every transition feeds our thinking-view. n8n stays on the shelf for future ops-side webhooks if this ever becomes a real deployment.</p></div>
+    <div class="card sponsor-card"><div class="sp-badge cognee-b">Cognee</div><h4>🧠 The Memory</h4><p style="font-size:13.5px">Case-memory graph + RBI/NPCI rules as queryable knowledge + per-bank behavioural stats + fraud VPA clustering. This is the LEARN loop: every resolved case makes the next ETA sharper and the next fraud signature easier to spot. Powers real ETAs (S1), adaptive chasing (S2), detection (S3).</p></div>
+    <div class="card sponsor-card"><div class="sp-badge sarvam-b">Sarvam</div><h4>🗣️ The Mouth & Ears</h4><p style="font-size:13.5px"><b>Voice-only in v2:</b> Hindi + regional voice notes (bulbul TTS) and STT for customers who speak their reply. India-specific speech quality is the whole reason it stays while the brain moved to Gemini (multilingual understanding comes free with a frontier model). Powers the voice beat of every strategy.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px;border:2px solid var(--cyan)">
+    <h4>🏆 Why this still wins "Best AI Usage" ($20k prize)</h4>
+    <p style="font-size:13.5px;color:#3A4E62">Two sponsors sit in the <b>critical path</b>, deeply — remove Cognee → every case starts from zero, no real ETAs, no fraud memory. Remove Sarvam → no Hindi voice notes, no voice-channel customers; the India-layer collapses. The brain is Gemini (not a sponsor — chosen on merit, and saying that out loud reads as engineering honesty). <b>Deep usage of two engines beats shallow usage of three</b> — and the thinking-view demo makes the usage visible live.</p>
+  </div>
+</section>
+
+<!-- ============ 8. ENGINE ROOM ============ -->
+<section id="engineroom">
+  <span class="kicker">08 · The Engine Room</span>
+  <h2 class="sec-title">Cognee + Sarvam: how they plug in, and what it costs</h2>
+
+  <div class="decision-banner">
+    <div class="dt">⚙️ Build decision · Oct 1</div>
+    <p><b>n8n is out of the core.</b> It's a separate platform we'd have to host, run, and wire into our own agent loop — for a coded product with a live thinking-view, that's theater, not engineering. Every "n8n" in the strategies above is now read as <b>our own in-app scheduler</b> (~200 lines of Python: SLA timers, retries, state machine). Two sponsors remain in the critical path — both below. That's an honest Best-AI-Usage story: <i>deep usage of two engines beats shallow usage of three.</i></p>
+    <p style="margin-top:10px">✨ <b>Update 2, same day:</b> the brain is now <b>Gemini 3 Flash</b> (best-in-class tool-calling for the agent loop, free tier ≈ 1,500 requests/day). <b>Sarvam = voice only</b> (TTS + STT) — the thing it's uniquely best at. Cognee connects to Gemini natively. Details and code on this page + the deep dive below.</p>
+    <p style="margin-top:10px">🗂️ <b>New: <a href="data-protocol.html" style="color:#8FE1FF;font-weight:700">The Case Files — the build spec</a></b> — the 3 modes locked (A: reversal narration · B: SLA-timeout filing · C: fraud/wrong-account), the 5 log tables with exact column names, per-mode detection queries, Case Brief fields, and full step-by-step protocols. Plus: brain now via Vertex on our GCP.</p>
+    <p style="margin-top:10px">🔬 <b>Deep dive: <a href="engines-deep.html" style="color:#8FE1FF;font-weight:700">Inside the Engines</a></b> — architecture map, what Cognee actually is (and isn't), the memory pipeline, the knowledge graph after 3 demo cases, and the full annotated agent-loop we write.</p>
+  </div>
+
+  <!-- GEMINI -->
+  <div class="engine" style="border-top:6px solid #1E5E8C">
+    <div class="eng-head"><div style="font-size:26px">✨</div><h3>Gemini 3 Flash via Vertex AI — the brain</h3></div>
+    <p style="font-size:13.5px;color:var(--muted)">What it does for Sahayak: <b>every agent decision</b> — which tool to call, when to speak, when to escalate. Also powers Cognee's extraction and the Hinglish parsing of customer replies. Runs on <b>Vertex AI inside our own GCP project</b> (personal-project-dg21) — same pattern as every other project in the folder: <b>gcloud auth, no API key, no OpenAI SDK</b>, billed per token to the subscription we already run.</p>
+
+    <div class="codeblock"><div class="cb-tag">Python · the brain via Vertex — google-genai SDK</div>
+<pre><span class="k">from</span> google <span class="k">import</span> genai
+
+llm = genai.Client(vertexai=<span class="k">True</span>,
+                   project=<span class="s">"personal-project-dg21"</span>,
+                   location=<span class="s">"us-central1"</span>)      <span class="c"># auth = gcloud ADC. No key. No OpenAI.</span>
+
+r = llm.models.generate_content(
+    model=<span class="s">"gemini-3-flash"</span>,                 <span class="c"># pin exact id at build time</span>
+    contents=build_prompt(SYSTEM, case_brief),
+    config=genai.types.GenerateContentConfig(tools=TOOL_SPECS))</pre></div>
+
+    <table class="price-tbl">
+      <tr><td style="border:none;font-weight:800;color:var(--navy)">Vertex AI billing (rides our GCP subscription)</td><td style="border:none"></td></tr>
+      <tr class="free-row"><td>per-token to personal-project-dg21 — one agent case ≈ under ₹1; full demo ≈ a few rupees; ₹0 if trial credits remain</td><td><b>≈ ₹0</b></td></tr>
+      <tr><td style="border:none;font-weight:800;color:var(--navy)">Model (per 1M tokens, promo through Dec 2026)</td><td style="border:none"></td></tr>
+      <tr><td>input $0.75 · output $3.75 — function-calling reliability is why it's the brain</td><td>≈ ₹0.05–0.9 / case</td></tr>
+    </table>
+  </div>
+
+  <!-- SARVAM -->
+  <div class="engine" style="border-top:6px solid #F2994A;margin-top:26px">
+    <div class="eng-head"><div style="font-size:26px">🗣️</div><h3>Sarvam AI — the mouth & ears (voice only)</h3></div>
+    <p style="font-size:13.5px;color:var(--muted)">What it does for Sahayak: <b>Hindi/regional voice notes</b> (Bulbul TTS) and <b>speech-to-text</b> for customers who reply by voice — the layer where India-specific speech quality actually matters. ✅ Already live on our account from v1 (key <code>sahayak-live</code>, verified Hindi voice through the app). Chat models exist but stay unused in v2 — the brain is Gemini.</p>
+
+    <div class="codeblock"><div class="cb-tag">Python · Bulbul TTS — the Hindi voice note</div>
+<pre><span class="k">import</span> requests, base64
+
+r = requests.post(<span class="s">"https://api.sarvam.ai/text-to-speech"</span>,
+    headers={<span class="s">"Authorization"</span>: <span class="k">f</span><span class="s">"Bearer {SARVAM_API_KEY}"</span>},
+    json={<span class="s">"text"</span>: msg_hindi,          <span class="c"># ≤ 2,500 chars per request</span>
+          <span class="s">"model"</span>: <span class="s">"bulbul:v3"</span>,       <span class="c"># v4 adds emotional voices, 11 languages</span>
+          <span class="s">"speaker"</span>: <span class="s">"anushka"</span>,
+          <span class="s">"audio_format"</span>: <span class="s">"wav"</span>})
+
+audio_b64 = r.json()[<span class="s">"audios"</span>][<span class="s">0</span>]   <span class="c"># → send as WhatsApp/SMS voice note</span></pre></div>
+
+    <div class="codeblock"><div class="cb-tag">Python · STT — the customer's voice reply back into text</div>
+<pre><span class="k">import</span> requests
+
+r = requests.post(<span class="s">"https://api.sarvam.ai/speech-to-text"</span>,
+    headers={<span class="s">"Authorization"</span>: <span class="k">f</span><span class="s">"Bearer {SARVAM_API_KEY}"</span>},
+    files={<span class="s">"file"</span>: (incoming_voice.wav, wav_bytes)},
+    data={<span class="s">"model"</span>: <span class="s">"saarika:v2.5"</span>, <span class="s">"language_code"</span>: <span class="s">"hi-IN"</span>})
+
+text = r.json()[<span class="s">"transcript"</span>]     <span class="c"># → Gemini parses it into case state</span></pre></div>
+
+    <table class="price-tbl">
+      <tr><td style="border:none;font-weight:800;color:var(--navy)">Bulbul TTS (voice notes)</td><td style="border:none"></td></tr>
+      <tr><td>₹3 per 1,000 characters (≤2,500 chars/request)</td><td>≈ ₹0.90 / voice note</td></tr>
+      <tr><td style="border:none;font-weight:800;color:var(--navy)">Speech-to-text (customer voice messages)</td><td style="border:none"></td></tr>
+      <tr><td>₹30 per hour</td><td>≈ ₹0.25 / voice msg</td></tr>
+      <tr class="free-row"><td style="border:none;font-weight:800;padding-top:12px">💚 FREE on signup — ₹100 credits, all APIs share one balance (we already have this) · startup program: 6–12 months free for qualifying startups</td><td style="border:none;font-weight:800;padding-top:12px">₹0 for us</td></tr>
+    </table>
+  </div>
+
+  <!-- COGNEE -->
+  <div class="engine" style="border-top:6px solid #7C5CFF;margin-top:26px">
+    <div class="eng-head"><div style="font-size:26px">🧠</div><h3>Cognee — the memory</h3></div>
+    <p style="font-size:13.5px;color:var(--muted)">What it does for Sahayak: turns every resolved case into a <b>knowledge graph</b> the agent can query — "how long do this bank's Z5 stalls take?", "has this VPA appeared in fraud cases before?", "what worked for similar cases?". That's the LEARN loop, and it's what makes Scene 1's real-ETA promise and Scene 3's detection honest. <b>Apache-2.0 open source — the library itself is free forever</b>, runs inside our own Python process (defaults: NetworkX graph + local stores, no cloud needed).</p>
+
+    <div class="codeblock"><div class="cb-tag">Python · the whole memory API is three verbs (v1.0)</div>
+<pre><span class="k">import</span> cognee                       <span class="c"># pip install cognee  (Apache-2.0)</span>
+
+<span class="c"># after a case closes — feed the case file into the graph</span>
+<span class="k">await</span> cognee.remember(case_file_text)
+<span class="c"># ↑ ingestion, entity extraction, graph build, enrichment — all internal</span>
+
+<span class="c"># Scene 1: real ETA — "similar cases, this bank, this code"</span>
+res = <span class="k">await</span> cognee.recall(
+    query_text=<span class="s">"median resolution time for Z5 stalls at SBI"</span>)
+
+<span class="c"># Scene 3: fraud memory — "has this VPA appeared in prior cases?"</span>
+res = <span class="k">await</span> cognee.recall(
+    query_text=<span class="s">"cases involving VPA shop@ybl or linked mule accounts"</span>)
+
+<span class="k">await</span> cognee.forget(everything=<span class="k">True</span>)   <span class="c"># clean slate for the demo</span></pre></div>
+
+    <div class="codeblock"><div class="cb-tag">Python · pointing its brain at Gemini (or a local model) — either way ₹0</div>
+<pre><span class="c"># Cognee is provider-agnostic (LiteLLM under the hood).</span>
+<span class="c"># Option A — same Gemini brain as the agent (native support):</span>
+<span class="c">#   env: LLM_PROVIDER=gemini, GEMINI_API_KEY=&lt;AI Studio key&gt;</span>
+<span class="c">#   (embedder stays local: sentence-transformers — free, offline)</span>
+<span class="c"># Option B — fully local, zero network (Ollama + local embedder):</span>
+<span class="c">#   env: LLM_PROVIDER=ollama, EMBEDDER=sentence-transformers</span>
+<span class="c"># Plan: A first; B as fallback if extraction quality wobbles.</span></pre></div>
+
+    <table class="price-tbl">
+      <tr><td style="border:none;font-weight:800;color:var(--navy)">Self-hosted library (what we use)</td><td style="border:none"></td></tr>
+      <tr class="free-row"><td>Apache-2.0 · pip install · runs in-process, works fully local with Ollama</td><td><b>₹0</b></td></tr>
+      <tr><td style="border:none;font-weight:800;color:var(--navy)">Cognee Cloud (optional, we don't need it)</td><td style="border:none"></td></tr>
+      <tr><td>Free-forever tier · then $1.00 / 1M tokens processed · $5 / workspace / mo · $0.08 / GB / mo storage</td><td>skipped</td></tr>
+    </table>
+    <p class="note">API note: current docs use remember/recall; older tutorials show <code>add()</code>/<code>cognify()</code>/<code>search()</code> — same idea, renamed. We'll pin the version we install.</p>
+  </div>
+
+  <!-- COST -->
+  <div class="sub">💰 What the whole project costs to build & run</div>
+  <div class="cost-card">
+    <h4>🧾 The ₹0 build path (v2: Gemini brain + Sarvam voice)</h4>
+    <div class="cost-row"><span>Agent brain — Gemini 3 Flash free tier (~1,500 req/day; demo uses ~20)</span><b>₹0</b></div>
+    <div class="cost-row"><span>Cognee memory (self-hosted; extraction via Gemini free tier or Ollama)</span><b>₹0</b></div>
+    <div class="cost-row"><span>One Hindi voice note (~300 chars, Sarvam Bulbul)</span><b>≈ ₹0.90</b></div>
+    <div class="cost-row"><span>Full 4-scene demo run — now only voice costs money</span><b>≈ ₹4–6</b></div>
+    <div class="cost-row"><span>Hosting (Cloud Run, min-instances 0)</span><b>≈ ₹0</b></div>
+    <div class="cost-row" style="font-weight:700"><span>₹100 free Sarvam credits ≈ <b>100+ voice notes / 20+ full rehearsals</b> — effectively free end-to-end</span><b>total ₹0</b></div>
+  </div>
+  <p class="note" style="max-width:860px">📚 Sources: <a href="https://www.sarvam.ai/api-pricing" target="_blank">Sarvam pricing</a> · <a href="https://docs.sarvam.ai/api/getting-started/pricing" target="_blank">Sarvam docs</a> · <a href="https://github.com/topoteretes/cognee" target="_blank">Cognee GitHub (Apache-2.0)</a> · <a href="https://docs.cognee.ai/getting-started/quickstart" target="_blank">Cognee quickstart (remember/recall)</a> · <a href="https://www.cognee.ai/pricing" target="_blank">Cognee Cloud pricing</a>. Rates as of Oct 2026 — pin exact numbers at build time.</p>
+</section>
+
+<!-- ============ 9. JUDGE ANSWER ============ -->
+<section id="judge">
+  <span class="kicker">09 · The 30-Second Answer</span>
+  <h2 class="sec-title">When a judge asks the question — say this</h2>
+  <div class="judge-card">
+    <span class="jc-tag">🎤 Memorize this</span>
+    <blockquote>"You're right — for most stuck payments, the <b>rail itself returns the money automatically</b>, usually within hours. But three things are still true. <b>One:</b> nobody tells the customer that — the single biggest support volume is humans narrating a waiting screen, at ₹80–150 a ticket. <b>Two:</b> when a reversal <b>stalls past its deadline, the rails never self-heal</b> — today a human has to notice, file with the RRN, and chase. <b>Three:</b> the scary cases — wrong account, fraud — have <b>no automatic path at all</b>, and every minute of delay burns recoverable money. Sahayak takes tier two entirely — the informing, filing, and chasing — and makes tier three <b>minutes instead of days</b> by handing humans a complete case file. It never touches the money itself. That boundary is the design."</blockquote>
+  </div>
+
+  <div class="sub">🎯 What this changes in our 4 demo scenes</div>
+  <div class="grid g2">
+    <div class="card"><h4>Scene 1 · re-titled honestly</h4><p style="font-size:13.5px;color:var(--muted)">Was "agent recovers ₹2,800." Now: <b style="color:var(--ok)">"the reversal was already flying — the agent's win is the customer knowing in second 1, and catching it when the rails stall."</b> Demo shows: brief loaded → reversal verified in-flight → proactive Hindi message with ETA + RRN → (twist) timer catches a stall → escalation.</p></div>
+    <div class="card"><h4>Scene 2 · the self-healing gap</h4><p style="font-size:13.5px;color:var(--muted)">Pending past SLA is the case <b>nobody automated</b>: auto-expiry already failed, nothing will ever fire again until a human files. Agent files with RRN itself, arms T+1/T+3 chases, narrates every hop. The strongest "replaces humans" scene.</p></div>
+    <div class="card"><h4>Scene 3 · pattern eyes</h4><p style="font-size:13.5px;color:var(--muted)">Duplicate pair detection + orphan verification. Humans spot these after the customer complains; the agent spots them pre-emptively from the txn stream.</p></div>
+    <div class="card"><h4>Scene 4 · the boundary is the feature</h4><p style="font-size:13.5px;color:var(--muted)">Wrong account + fraud signature → agent assembles everything in seconds, then <b>stops</b>. One alert, full evidence, human decides. On stage this restraint reads as intelligence — because it is.</p></div>
+  </div>
+</section>
+
+<footer>
+  Built for <b>Team Maverick</b> · Sahayak — Paytm Build for India · Reality Check page pairs with <a href="index.html" style="color:#7FE3FF">UPI 101</a> · directional numbers, labeled as such on purpose.
+</footer>
+
+<script>
+const secs=[...document.querySelectorAll('section[id]')];
+const nls=[...document.querySelectorAll('nav a.nl')];
+window.addEventListener('scroll',()=>{let cur='reality.html';secs.forEach(s=>{if(window.scrollY>=s.offsetTop-140)cur=s.id});nls.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur||a.getAttribute('href')==='reality.html'&&cur==='reality.html'))},{passive:true});
+</script>
+</body>
+</html>
